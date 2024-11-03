@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 
 # Match models
@@ -8,6 +8,8 @@ from pydantic import BaseModel, Field, field_validator
 class ObjectiveDto(BaseModel):
     first: bool | None = Field(None)
     kills: int | None = Field(None)
+
+    model_config = ConfigDict(extra='forbid')
 
 
 class ObjectivesDto(BaseModel):
@@ -19,10 +21,14 @@ class ObjectivesDto(BaseModel):
     riftHerald: ObjectiveDto | None = Field(None)
     tower: ObjectiveDto | None = Field(None)
 
+    model_config = ConfigDict(extra='forbid')
+
 
 class BanDto(BaseModel):
     championId: int | None = Field(None)
     pickTurn: int | None = Field(None)
+
+    model_config = ConfigDict(extra='forbid')
 
 
 class TeamDto(BaseModel):
@@ -31,6 +37,8 @@ class TeamDto(BaseModel):
     teamId: int | None = Field(None)
     win: bool | None = Field(None)
 
+    model_config = ConfigDict(extra='forbid')
+
 
 class PerkStyleSelectionDto(BaseModel):
     perk: int | None = Field(None)
@@ -38,11 +46,15 @@ class PerkStyleSelectionDto(BaseModel):
     var2: int | None = Field(None)
     var3: int | None = Field(None)
 
+    model_config = ConfigDict(extra='forbid')
+
 
 class PerkStyleDto(BaseModel):
     description: str | None = Field(None)
     selections: List[PerkStyleSelectionDto] | None = Field(None)
     style: int | None = Field(None)
+
+    model_config = ConfigDict(extra='forbid')
 
 
 class PerkStatsDto(BaseModel):
@@ -50,10 +62,14 @@ class PerkStatsDto(BaseModel):
     flex: int | None = Field(None)
     offense: int | None = Field(None)
 
+    model_config = ConfigDict(extra='forbid')
+
 
 class PerksDto(BaseModel):
     statPerks: PerkStatsDto | None = Field(None)
     styles: List[PerkStyleDto] | None = Field(None)
+
+    model_config = ConfigDict(extra='forbid')
 
 
 class MissionsDto(BaseModel):
@@ -69,6 +85,8 @@ class MissionsDto(BaseModel):
     playerScore9: int | None = Field(None)
     playerScore10: int | None = Field(None)
     playerScore11: int | None = Field(None)
+
+    model_config = ConfigDict(extra='forbid')
 
 
 class ParticipantDto(BaseModel):
@@ -165,6 +183,8 @@ class ParticipantDto(BaseModel):
     playerAugment2: int | None = Field(None)
     playerAugment3: int | None = Field(None)
     playerAugment4: int | None = Field(None)
+    playerAugment5: int | None = Field(None)
+    playerAugment6: int | None = Field(None)
     playerSubteamId: int | None = Field(None)
     pushPings: int | None = Field(None, description='Green minion')
     profileIcon: int | None = Field(None)
@@ -230,6 +250,13 @@ class ParticipantDto(BaseModel):
 
         return {key: repr(val) for key, val in obj.items()}
 
+    basicPings: int | None = Field(None)
+    dangerPings: int | None = Field(None)
+    retreatPings: int | None = Field(None)
+    baitPings: int | None = Field(None)
+    riotIdName: str | None = Field(None)
+    model_config = ConfigDict(extra='forbid')
+
 
 class InfoDto(BaseModel):
     endOfGameResult: str | None = Field(None, description='Refer to indicate if the game ended in termination.')
@@ -254,16 +281,22 @@ class InfoDto(BaseModel):
     tournamentCode: str | None = Field(None,
                                        description='Tournament code used to generate the match. This field was added to match-v5 in patch 11.13 on June 23rd, 2021.')
 
+    model_config = ConfigDict(extra='forbid')
+
 
 class MetadataDto(BaseModel):
     dataVersion: str | None = Field(None, description='Match data version.')
     matchId: str | None = Field(None, description='Match id.')
     participants: List[str] | None = Field(None, description='A list of participant PUUIDs.')
 
+    model_config = ConfigDict(extra='forbid')
+
 
 class MatchDto(BaseModel):
     metadata: MetadataDto | None = Field(None, description='Match metadata.')
     info: InfoDto | None = Field(None, description='Match info.')
+
+    model_config = ConfigDict(extra='forbid')
 
 
 # Timeline models
@@ -271,6 +304,8 @@ class MatchDto(BaseModel):
 class PositionDto(BaseModel):
     x: int | None = Field(None)
     y: int | None = Field(None)
+
+    model_config = ConfigDict(extra='forbid')
 
 
 class DamageStatsDto(BaseModel):
@@ -286,6 +321,8 @@ class DamageStatsDto(BaseModel):
     trueDamageDone: int | None = Field(None)
     trueDamageDoneToChampions: int | None = Field(None)
     trueDamageTaken: int | None = Field(None)
+
+    model_config = ConfigDict(extra='forbid')
 
 
 class ChampionStatsDto(BaseModel):
@@ -315,6 +352,8 @@ class ChampionStatsDto(BaseModel):
     powerRegen: int | None = Field(None)
     spellVamp: int | None = Field(None)
 
+    model_config = ConfigDict(extra='forbid')
+
 
 class ParticipantFrameDto(BaseModel):
     championStats: ChampionStatsDto | None = Field(None)
@@ -330,45 +369,92 @@ class ParticipantFrameDto(BaseModel):
     totalGold: int | None = Field(None)
     xp: int | None = Field(None)
 
+    model_config = ConfigDict(extra='forbid')
 
-class ParticipantFramesDto(BaseModel):
-    ParticipantFrameDto1: ParticipantFrameDto | None = Field(None, alias='1',
-                                                             description='Key value mapping for each participant')
-    ParticipantFrameDto2: ParticipantFrameDto | None = Field(None, alias='2',
-                                                             description='Key value mapping for each participant')
-    ParticipantFrameDto3: ParticipantFrameDto | None = Field(None, alias='3',
-                                                             description='Key value mapping for each participant')
-    ParticipantFrameDto4: ParticipantFrameDto | None = Field(None, alias='4',
-                                                             description='Key value mapping for each participant')
-    ParticipantFrameDto5: ParticipantFrameDto | None = Field(None, alias='5',
-                                                             description='Key value mapping for each participant')
-    ParticipantFrameDto6: ParticipantFrameDto | None = Field(None, alias='6',
-                                                             description='Key value mapping for each participant')
-    ParticipantFrameDto7: ParticipantFrameDto | None = Field(None, alias='7',
-                                                             description='Key value mapping for each participant')
-    ParticipantFrameDto8: ParticipantFrameDto | None = Field(None, alias='8',
-                                                             description='Key value mapping for each participant')
-    ParticipantFrameDto9: ParticipantFrameDto | None = Field(None, alias='9',
-                                                             description='Key value mapping for each participant')
-    ParticipantFrameDto10: ParticipantFrameDto | None = Field(None, alias='10',
-                                                              description='Key value mapping for each participant')
+
+class VictimDamageDealt(BaseModel):
+    basic: bool | None = Field(None)
+    magicDamage: int | None = Field(None)
+    name: str | None = Field(None)
+    participantId: int | None = Field(None)
+    physicalDamage: int | None = Field(None)
+    spellName: str | None = Field(None)
+    spellSlot: int | None = Field(None)
+    trueDamage: int | None = Field(None)
+    type: str | None = Field(None)
+
+    model_config = ConfigDict(extra='forbid')
+
+
+class VictimDamageReceived(BaseModel):
+    basic: bool | None = Field(None)
+    magicDamage: int | None = Field(None)
+    name: str | None = Field(None)
+    participantId: int | None = Field(None)
+    physicalDamage: int | None = Field(None)
+    spellName: str | None = Field(None)
+    spellSlot: int | None = Field(None)
+    trueDamage: int | None = Field(None)
+    type: str | None = Field(None)
+
+    model_config = ConfigDict(extra='forbid')
 
 
 class EventsTimeLineDto(BaseModel):
     timestamp: int | None = Field(None)
-    realTimestamp: int | None = Field(None)
     type: str | None = Field(None)
+
+    realTimestamp: int | None = Field(None)  # PAUSE_END, GAME_END
+    gameId: int | None = Field(None)  # GAME_END
+    winningTeam: int | None = Field(None)  # GAME_END
+    itemId: int | None = Field(None)  # ITEM_PURCHASED, ITEM_DESTROYED
+    participantId: int | None = Field(None)  # ITEM_PURCHASED, ITEM_DESTROYED
+    levelUpType: str | None = Field(None)  # SKILL_LEVEL_UP
+    skillSlot: int | None = Field(None)  # SKILL_LEVEL_UP
+    level: int | None = Field(None)  # LEVEL_UP
+    creatorId: int | None = Field(None)  # WARD_PLACED
+    wardType: str | None = Field(None)  # WARD_PLACED
+    killerId: int | None = Field(None)  # CHAMPION_KILL, BUILDING_KILL, CHAMPION_SPECIAL_KILL, ELITE_MONSTER_KILL
+    killStreakLength: int | None = Field(None)  # CHAMPION_KILL
+    position: PositionDto | None = Field(None)  # CHAMPION_KILL, TURRET_PLATE_DESTROYED, BUILDING_KILL
+    bounty: int | None = Field(None)  # CHAMPION_KILL, BUILDING_KILL, ELITE_MONSTER_KILL
+    shutdownBounty: int | None = Field(None)  # CHAMPION_KILL
+    victimDamageDealt: List[VictimDamageDealt] | None = Field(None)  # CHAMPION_KILL
+    victimDamageReceived: List[VictimDamageReceived] | None = Field(None)  # CHAMPION_KILL
+    victimId: int | None = Field(None)  # CHAMPION_KILL
+    assistingParticipantIds: List[int] | None = Field(None)  # CHAMPION_KILL, BUILDING_KILL, ELITE_MONSTER_KILL
+    teamId: int | None = Field(None)  # BUILDING_KILL, TURRET_PLATE_DESTROYED, ELITE_MONSTER_KILL
+    buildingType: str | None = Field(None)  # BUILDING_KILL
+    towerType: str | None = Field(None)  # BUILDING_KILL
+    laneType: str | None = Field(None)  # TURRET_PLATE_DESTROYED, BUILDING_KILL
+    killType: str | None = Field(None)  # CHAMPION_SPECIAL_KILL
+    multiKillLength: int | None = Field(None)  # CHAMPION_SPECIAL_KILL
+    monsterType: str | None = Field(None)  # ELITE_MONSTER_KILL
+    monsterSubType: str | None = Field(None)  # ELITE_MONSTER_KILL
+    killerTeamId: int | None = Field(None)  # ELITE_MONSTER_KILL
+    afterId: int | None = Field(None)  # ITEM_UNDO
+    beforeId: int | None = Field(None)  # ITEM_UNDO
+    goldGain: int | None = Field(None)  # ITEM_UNDO
+    actualStartTime: int | None = Field(None)  # OBJECTIVE_BOUNTY_PRESTART
+    name: str | None = Field(None)  # DRAGON_SOUL_GIVEN
+    transformType: str | None = Field(None)  # CHAMPION_TRANSFORM
+
+    model_config = ConfigDict(extra='forbid')
 
 
 class FramesTimeLineDto(BaseModel):
     events: List[EventsTimeLineDto] | None = Field(None)
-    participantFrames: ParticipantFramesDto | None = Field(None)
+    participantFrames: dict[str, ParticipantFrameDto] | None = Field(None)
     timestamp: int | None = Field(None)
+
+    model_config = ConfigDict(extra='forbid')
 
 
 class ParticipantTimeLineDto(BaseModel):
     participantId: int | None = Field(None)
     puuid: str | None = Field(None)
+
+    model_config = ConfigDict(extra='forbid')
 
 
 class InfoTimeLineDto(BaseModel):
@@ -378,13 +464,19 @@ class InfoTimeLineDto(BaseModel):
     participants: List[ParticipantTimeLineDto] | None = Field(None)
     frames: List[FramesTimeLineDto] | None = Field(None)
 
+    model_config = ConfigDict(extra='forbid')
+
 
 class MetadataTimeLineDto(BaseModel):
     dataVersion: str | None = Field(None, description='Match data version.')
     matchId: str | None = Field(None, description='Match id.')
     participants: List[str] | None = Field(None, description='A list of participant PUUIDs.')
 
+    model_config = ConfigDict(extra='forbid')
+
 
 class TimelineDto(BaseModel):
     metadata: MetadataTimeLineDto | None = Field(None, description='Match metadata.')
     info: InfoTimeLineDto | None = Field(None, description='Match info.')
+
+    model_config = ConfigDict(extra='forbid')

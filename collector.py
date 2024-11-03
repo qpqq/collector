@@ -7,9 +7,24 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlmodel import Session, select
 
 from config import get_logger, NOT_FOUNDED_EXIT, NOT_FOUNDED_ERROR, NOT_FOUNDED_WARNING
-from db import engine, Match, Participant, Challenge, ChallengeParticipantLink, Missions, Perk, Team, Ban
+from db import (
+    engine,
+    Match,
+    Participant,
+    Challenge,
+    ChallengeParticipantLink,
+    Missions,
+    Perk,
+    Team,
+    Ban,
+    ParticipantFrame,
+    Frame,
+    Event,
+    VictimDamageDealt,
+    VictimDamageReceived
+)
 from handlers import PydanticDeserializer
-from models import MatchDto, TimelineDto
+from models import MatchDto, TimelineDto, FramesTimeLineDto, ParticipantDto
 
 logger = get_logger(__name__)
 
@@ -24,6 +39,7 @@ class Collector:
 
     def get(self, method, *args, retry: int = 0, error: Exception = None, **kwargs):
         if retry > 2:
+            logger.error('All retries are exceeded')
             raise error
 
         try:
@@ -33,10 +49,7 @@ class Collector:
             return result
 
         except ApiError as err:
-            if err.response.status_code == 429:
-                logger.warning(f'Flood penalty for {err.headers['Retry-After']}s')
-
-            elif err.response.status_code == 404:
+            if err.response.status_code == 404:
                 logger.info(
                     f'{method.__qualname__}('
                     f'{', '.join([repr(arg) for arg in args])}'
@@ -62,7 +75,8 @@ class Collector:
                     )
 
             else:
-                raise
+                logger.warning(f'HTTPError occurred while {retry} retry')
+                return self.get(method, *args, retry=retry + 1, error=err, **kwargs)
 
         except ConnectionError as err:
             logger.warning(f'ConnectionError occurred while {retry} retry')
@@ -96,58 +110,64 @@ class Collector:
             for challenge in participant.challenges:
                 challenges.add(challenge)
 
-        challenges_table: dict[str, Challenge] = {}
+        challenges_name_to_challenge: dict[str, Challenge] = {}
         for challenge in challenges:
             statement = insert(Challenge).values(name=challenge)
             # noinspection PyDeprecation
             session.execute(statement.on_conflict_do_nothing(index_elements=['name']))
 
             # noinspection PyTypeChecker,Pydantic
-            challenges_table[challenge] = session.exec(
-                select(Challenge).where(Challenge.name == challenge)).one()
+            challenges_name_to_challenge[challenge] = session.exec(
+                select(Challenge).where(Challenge.name == challenge)
+            ).one()
 
-        return challenges_table
+        return challenges_name_to_challenge
 
     @staticmethod
-    def _get_participants(match: MatchDto, challenges_table: dict[str, Challenge]):
+    def _get_perks(participant: ParticipantDto):
+        perks_db = []
+        for perk in participant.perks.styles:
+            for selection in perk.selections:
+                perk_db = Perk.model_validate(selection.model_dump())
+                perk_db.description = perk.description
+                perk_db.style = perk.style
+
+                perks_db.append(perk_db)
+
+        return perks_db
+
+    def _get_participants(self, match: MatchDto, challenges_table: dict[str, Challenge], session: Session):
         participants: list[Participant] = []
         for participant in match.info.participants:
-
-            perks_db: list[Perk] = []
-            for perk in participant.perks.styles:
-                for selection in perk.selections:
-                    perk_db = Perk.model_validate(selection.model_dump())
-                    perk_db.description = perk.description
-                    perk_db.style = perk.style
-
-                    perks_db.append(perk_db)
 
             participant_db = Participant.model_validate(participant.model_dump())
             participant_db.defenseStat = participant.perks.statPerks.defense
             participant_db.flexStat = participant.perks.statPerks.flex
             participant_db.offenseStat = participant.perks.statPerks.offense
-            participant_db.perks = perks_db
+
+            participant_db.perks = self._get_perks(participant)
 
             if participant.missions is not None:
                 participant_db.missions = Missions.model_validate(participant.missions.model_dump())
 
             if participant.challenges is not None:
                 for challenge_name, challenge_value in participant.challenges.items():
-                    ChallengeParticipantLink(
+                    session.add(ChallengeParticipantLink(
                         value=challenge_value,
                         challenge=challenges_table[challenge_name],
                         participant=participant_db
-                    )
+                    ))
 
             participants.append(participant_db)
 
         return participants
 
     @staticmethod
-    def _get_teams(match: MatchDto):
+    def _get_teams(match: MatchDto, participants: list[Participant]):
         teams: list[Team] = []
         for team in match.info.teams:
             team_db = Team.model_validate(team.model_dump())
+
             team_db.baronFirst = team.objectives.baron.first
             team_db.baronKills = team.objectives.baron.kills
             team_db.championFirst = team.objectives.champion.first
@@ -163,11 +183,116 @@ class Collector:
             team_db.riftHeraldKills = team.objectives.riftHerald.kills
             team_db.towerFirst = team.objectives.tower.first
             team_db.towerKills = team.objectives.tower.kills
+
             team_db.bans = [Ban.model_validate(ban.model_dump()) for ban in team.bans]
+            team_db.participants = [participant for participant in participants if participant.teamId == team.teamId]
 
             teams.append(team_db)
 
         return teams
+
+    @staticmethod
+    def _get_victim_damages_dealt(event: Event, participant_id_to_participant: dict[int, Participant]):
+        victim_damages_dealt_db = []
+        for victim_damage_dealt in event.victimDamageDealt:
+            victim_damage_dealt_db = VictimDamageDealt.model_validate(
+                victim_damage_dealt.model_dump()
+            )
+            victim_damage_dealt_db.participant = participant_id_to_participant[
+                victim_damage_dealt.participantId
+            ] if victim_damage_dealt.participantId != 0 else None
+
+            victim_damages_dealt_db.append(victim_damage_dealt_db)
+
+        return victim_damages_dealt_db
+
+    @staticmethod
+    def _get_victim_damages_received(event: Event, participant_id_to_participant: dict[int, Participant]):
+        victim_damages_received_db = []
+        for victim_damage_received in event.victimDamageReceived:
+            victim_damage_received_db = VictimDamageReceived.model_validate(
+                victim_damage_received.model_dump()
+            )
+
+            victim_damage_received_db.participant = participant_id_to_participant[
+                victim_damage_received.participantId
+            ] if victim_damage_received.participantId != 0 else None
+
+            victim_damages_received_db.append(victim_damage_received_db)
+
+        return victim_damages_received_db
+
+    def _get_events(
+            self,
+            match: Match,
+            frame: FramesTimeLineDto,
+            participant_id_to_participant: dict[int, Participant],
+            team_id_to_team: dict[int, Team]
+    ):
+        events_db = []
+        for event in frame.events:
+            event_db = Event.model_validate(event.model_dump())
+
+            if event.victimDamageDealt:
+                event_db.victimDamageDealt = self._get_victim_damages_dealt(event, participant_id_to_participant)
+
+            if event.victimDamageReceived:
+                event_db.victimDamageReceived = self._get_victim_damages_received(event, participant_id_to_participant)
+
+            if event.position:
+                event_db.x = event.position.x
+                event_db.y = event.position.y
+
+            event_db.game = match
+            event_db.winningTeam = team_id_to_team.get(event.winningTeam)
+            event_db.participant = participant_id_to_participant.get(event.participantId)
+            event_db.creator = participant_id_to_participant.get(event.creatorId)
+            event_db.killer = participant_id_to_participant.get(event.killerId)
+            event_db.victim = participant_id_to_participant.get(event.victimId)
+            event_db.team = team_id_to_team.get(event.teamId)
+            event_db.killerTeam = team_id_to_team.get(event.killerTeamId)
+
+            if event.assistingParticipantIds:
+                event_db.assistingParticipants = [
+                    participant_id_to_participant[participant_id]
+                    for participant_id
+                    in set(event.assistingParticipantIds)
+                ]
+
+            events_db.append(event_db)
+
+        return events_db
+
+    @staticmethod
+    def _get_participant_frames(frame: FramesTimeLineDto, participant_id_to_participant: dict[int, Participant]):
+        participant_frames_db = []
+        for participant_id, participant_frames in frame.participantFrames.items():
+            participant_frame_db = ParticipantFrame.model_validate(
+                participant_frames.model_dump() |
+                participant_frames.championStats.model_dump() |
+                participant_frames.damageStats.model_dump() |
+                participant_frames.position.model_dump()
+            )
+
+            participant_frame_db.participant = participant_id_to_participant[participant_frames.participantId]
+            participant_frames_db.append(participant_frame_db)
+
+        return participant_frames_db
+
+    def _get_frames(self, timeline: TimelineDto, match: Match, participants: list[Participant], teams: list[Team]):
+        participant_id_to_participant = {participant.participantId: participant for participant in participants}
+        team_id_to_team = {team.teamId: team for team in teams}
+
+        frames_db = []
+        for frame in timeline.info.frames:
+            frame_db = Frame(timestamp=frame.timestamp)
+
+            frame_db.events = self._get_events(match, frame, participant_id_to_participant, team_id_to_team)
+            frame_db.participant_frames = self._get_participant_frames(frame, participant_id_to_participant)
+
+            frames_db.append(frame_db)
+
+        return frames_db
 
     def insert(self, match: MatchDto, timeline: TimelineDto):
         if match is None or timeline is None:
@@ -180,8 +305,16 @@ class Collector:
                 return
 
             match_db = Match.model_validate(match.info.model_dump() | match.metadata.model_dump())
-            match_db.participants = self._get_participants(match, self._get_challenges(match, session))
-            match_db.teams = self._get_teams(match)
+
+            challenges = self._get_challenges(match, session)
+            participants = self._get_participants(match, challenges, session)
+            teams = self._get_teams(match, participants)
+            frames = self._get_frames(timeline, match_db, participants, teams)
+
+            match_db.frameInterval = timeline.info.frameInterval
+            match_db.participants = participants
+            match_db.teams = teams
+            match_db.frames = frames
 
             session.add(match_db)
             session.commit()
@@ -200,4 +333,5 @@ class Collector:
             except Exception as err:
                 logger.error(f'unexpected error {err}: {traceback.format_exc()}')
 
+            # break
             self.index += 1

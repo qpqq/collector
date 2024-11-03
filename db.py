@@ -35,10 +35,15 @@ class Match(SQLModel, table=True):
     tournamentCode: str | None = Field(None,
                                        description='Tournament code used to generate the match. This field was added to match-v5 in patch 11.13 on June 23rd, 2021.')
 
+    # InfoTimeLineDto
+    frameInterval: int | None = Field(None)
+
     # List[ParticipantDto]
     participants: List['Participant'] | None = Relationship(back_populates='match')
     # List[TeamDto]
     teams: List['Team'] | None = Relationship(back_populates='match')
+    # List[FramesTimeLineDto]
+    frames: List['Frame'] | None = Relationship(back_populates='match')
 
 
 class ChallengeParticipantLink(SQLModel, table=True):
@@ -48,6 +53,11 @@ class ChallengeParticipantLink(SQLModel, table=True):
     challenge: Union['Challenge', None] = Relationship(back_populates='participant_links')
     participant_id: int | None = Field(default=None, foreign_key='participant.id', primary_key=True)
     participant: Union['Participant', None] = Relationship(back_populates='challenge_links')
+
+
+class AssistingParticipantsLink(SQLModel, table=True):
+    event_id: int | None = Field(default=None, foreign_key='event.id', primary_key=True)
+    participant_id: int | None = Field(default=None, foreign_key='participant.id', primary_key=True)
 
 
 class Participant(SQLModel, table=True):
@@ -112,7 +122,6 @@ class Participant(SQLModel, table=True):
     magicDamageDealt: int | None = Field(None)
     magicDamageDealtToChampions: int | None = Field(None)
     magicDamageTaken: int | None = Field(None)
-    # missions: MissionsDto | None = Field(None)
     neutralMinionsKilled: int | None = Field(None,
                                              description='neutralMinionsKilled = mNeutralMinionsKilled, which is incremented on kills of kPet and kJungleMonster')
     needVisionPings: int | None = Field(None, description='Green ward')
@@ -144,6 +153,8 @@ class Participant(SQLModel, table=True):
     playerAugment2: int | None = Field(None)
     playerAugment3: int | None = Field(None)
     playerAugment4: int | None = Field(None)
+    playerAugment5: int | None = Field(None)
+    playerAugment6: int | None = Field(None)
     playerSubteamId: int | None = Field(None)
     pushPings: int | None = Field(None, description='Green minion')
     profileIcon: int | None = Field(None)
@@ -166,7 +177,7 @@ class Participant(SQLModel, table=True):
     summonerLevel: int | None = Field(None)
     summonerName: str | None = Field(None)
     teamEarlySurrendered: bool | None = Field(None)
-    teamId: int | None = Field(None)
+    teamId: int | None = Field(None, foreign_key='team.id')
     teamPosition: str | None = Field(None,
                                      description='Both individualPosition and teamPosition are computed by the game server and are different versions of the most likely position played by a player. The individualPosition is the best guess for which position the player actually played in isolation of anything else. The teamPosition is the best guess for which position the player actually played if we add the constraint that each team must have one top player, one jungle, one middle, etc. Generally the recommendation is to use the teamPosition field over the individualPosition field.')
     timeCCingOthers: int | None = Field(None)
@@ -201,6 +212,13 @@ class Participant(SQLModel, table=True):
     wardsPlaced: int | None = Field(None)
     win: bool | None = Field(None)
 
+    # extra
+    basicPings: int | None = Field(None)
+    dangerPings: int | None = Field(None)
+    retreatPings: int | None = Field(None)
+    baitPings: int | None = Field(None)
+    riotIdName: str | None = Field(None)
+
     # PerkStatsDto
     defenseStat: int | None = Field(None, alias='defense')
     flexStat: int | None = Field(None, alias='flex')
@@ -208,6 +226,7 @@ class Participant(SQLModel, table=True):
 
     match_id: int | None = Field(None, foreign_key='match.id')
     match: Match | None = Relationship(back_populates='participants')
+    team: Union['Team', None] = Relationship(back_populates='participants')
 
     # dict[str, str]
     challenge_links: List[ChallengeParticipantLink] | None = Relationship(back_populates='participant')
@@ -215,6 +234,8 @@ class Participant(SQLModel, table=True):
     missions: Union['Missions', None] = Relationship(back_populates='participant')
     # PerksDto
     perks: List['Perk'] | None = Relationship(back_populates='participant')
+    # List[ParticipantFramesDto]
+    participant_frames: List['ParticipantFrame'] | None = Relationship(back_populates='participant')
 
 
 class Challenge(SQLModel, table=True):
@@ -287,6 +308,9 @@ class Team(SQLModel, table=True):
     match_id: int | None = Field(None, foreign_key='match.id')
     match: Match | None = Relationship(back_populates='teams')
 
+    # List[ParticipantDto]
+    participants: List[Participant] | None = Relationship(back_populates='team')
+
 
 class Ban(SQLModel, table=True):
     id: int | None = Field(None, primary_key=True)
@@ -298,16 +322,185 @@ class Ban(SQLModel, table=True):
     team: Team | None = Relationship(back_populates='bans')
 
 
+class Frame(SQLModel, table=True):
+    id: int | None = Field(None, primary_key=True)
+    timestamp: int | None = Field(None)
+
+    match_id: int | None = Field(None, foreign_key='match.id')
+    match: Match | None = Relationship(back_populates='frames')
+
+    # List[EventsTimeLineDto]
+    events: List['Event'] | None = Relationship(back_populates='frame')
+    # List[ParticipantFramesDto]
+    participant_frames: List['ParticipantFrame'] | None = Relationship(back_populates='frame')
+
+
+class Event(SQLModel, table=True):
+    id: int | None = Field(None, primary_key=True)
+
+    timestamp: int | None = Field(None)
+    type: str | None = Field(None)
+
+    realTimestamp: datetime | None = Field(None)
+    gameId: int | None = Field(None, foreign_key='match.id')
+    winningTeamId: int | None = Field(None, foreign_key='team.id')  # original name winningTeam
+    itemId: int | None = Field(None)
+    participantId: int | None = Field(None, foreign_key='participant.id')
+    levelUpType: str | None = Field(None)
+    skillSlot: int | None = Field(None)
+    level: int | None = Field(None)
+    creatorId: int | None = Field(None, foreign_key='participant.id')
+    wardType: str | None = Field(None)
+    killerId: int | None = Field(None, foreign_key='participant.id')
+    killStreakLength: int | None = Field(None)
+    x: int | None = Field(None)
+    y: int | None = Field(None)
+    bounty: int | None = Field(None)
+    shutdownBounty: int | None = Field(None)
+    victimDamageDealt: List['VictimDamageDealt'] | None = Relationship(back_populates='event')
+    victimDamageReceived: List['VictimDamageReceived'] | None = Relationship(back_populates='event')
+    victimId: int | None = Field(None, foreign_key='participant.id')
+    teamId: int | None = Field(None, foreign_key='team.id')
+    buildingType: str | None = Field(None)
+    towerType: str | None = Field(None)
+    laneType: str | None = Field(None)
+    killType: str | None = Field(None)
+    multiKillLength: int | None = Field(None)
+    monsterType: str | None = Field(None)
+    monsterSubType: str | None = Field(None)
+    killerTeamId: int | None = Field(None, foreign_key='team.id')
+    afterId: int | None = Field(None)
+    beforeId: int | None = Field(None)
+    goldGain: int | None = Field(None)
+    actualStartTime: int | None = Field(None)
+    name: str | None = Field(None)
+    transformType: str | None = Field(None)
+
+    game: Match | None = Relationship(sa_relationship_kwargs={'foreign_keys': '[Event.gameId]'})
+    winningTeam: Team | None = Relationship(sa_relationship_kwargs={'foreign_keys': '[Event.winningTeamId]'})
+    participant: Participant | None = Relationship(sa_relationship_kwargs={'foreign_keys': '[Event.participantId]'})
+    creator: Participant | None = Relationship(sa_relationship_kwargs={'foreign_keys': '[Event.creatorId]'})
+    killer: Participant | None = Relationship(sa_relationship_kwargs={'foreign_keys': '[Event.killerId]'})
+    victim: Participant | None = Relationship(sa_relationship_kwargs={'foreign_keys': '[Event.victimId]'})
+    team: Team | None = Relationship(sa_relationship_kwargs={'foreign_keys': '[Event.teamId]'})
+    killerTeam: Team | None = Relationship(sa_relationship_kwargs={'foreign_keys': '[Event.killerTeamId]'})
+
+    assistingParticipants: List[Participant] | None = Relationship(link_model=AssistingParticipantsLink)
+
+    frame_id: int | None = Field(None, foreign_key='frame.id')
+    frame: Frame | None = Relationship(back_populates='events')
+
+
+class VictimDamageDealt(SQLModel, table=True):
+    id: int | None = Field(None, primary_key=True)
+
+    basic: bool | None = Field(None)
+    magicDamage: int | None = Field(None)
+    name: str | None = Field(None)
+    participantId: int | None = Field(None, foreign_key='participant.id')
+    physicalDamage: int | None = Field(None)
+    spellName: str | None = Field(None)
+    spellSlot: int | None = Field(None)
+    trueDamage: int | None = Field(None)
+    type: str | None = Field(None)
+
+    event_id: int | None = Field(None, foreign_key='event.id')
+    event: Event | None = Relationship(back_populates='victimDamageDealt')
+    participant: Participant | None = Relationship()
+
+
+class VictimDamageReceived(SQLModel, table=True):
+    id: int | None = Field(None, primary_key=True)
+
+    basic: bool | None = Field(None)
+    magicDamage: int | None = Field(None)
+    name: str | None = Field(None)
+    participantId: int | None = Field(None, foreign_key='participant.id')
+    physicalDamage: int | None = Field(None)
+    spellName: str | None = Field(None)
+    spellSlot: int | None = Field(None)
+    trueDamage: int | None = Field(None)
+    type: str | None = Field(None)
+
+    event_id: int | None = Field(None, foreign_key='event.id')
+    event: Event | None = Relationship(back_populates='victimDamageReceived')
+    participant: Participant | None = Relationship()
+
+
+class ParticipantFrame(SQLModel, table=True):
+    id: int | None = Field(None, primary_key=True)
+
+    # ParticipantFrameDto
+    currentGold: int | None = Field(None)
+    goldPerSecond: int | None = Field(None)
+    jungleMinionsKilled: int | None = Field(None)
+    level: int | None = Field(None)
+    minionsKilled: int | None = Field(None)
+    participantId: int | None = Field(None, foreign_key='participant.id')
+    timeEnemySpentControlled: int | None = Field(None)
+    totalGold: int | None = Field(None)
+    xp: int | None = Field(None)
+
+    # ChampionStatsDto
+    abilityHaste: int | None = Field(None)
+    abilityPower: int | None = Field(None)
+    armor: int | None = Field(None)
+    armorPen: int | None = Field(None)
+    armorPenPercent: int | None = Field(None)
+    attackDamage: int | None = Field(None)
+    attackSpeed: int | None = Field(None)
+    bonusArmorPenPercent: int | None = Field(None)
+    bonusMagicPenPercent: int | None = Field(None)
+    ccReduction: int | None = Field(None)
+    cooldownReduction: int | None = Field(None)
+    health: int | None = Field(None)
+    healthMax: int | None = Field(None)
+    healthRegen: int | None = Field(None)
+    lifesteal: int | None = Field(None)
+    magicPen: int | None = Field(None)
+    magicPenPercent: int | None = Field(None)
+    magicResist: int | None = Field(None)
+    movementSpeed: int | None = Field(None)
+    omnivamp: int | None = Field(None)
+    physicalVamp: int | None = Field(None)
+    power: int | None = Field(None)
+    powerMax: int | None = Field(None)
+    powerRegen: int | None = Field(None)
+    spellVamp: int | None = Field(None)
+
+    # DamageStatsDto
+    magicDamageDone: int | None = Field(None)
+    magicDamageDoneToChampions: int | None = Field(None)
+    magicDamageTaken: int | None = Field(None)
+    physicalDamageDone: int | None = Field(None)
+    physicalDamageDoneToChampions: int | None = Field(None)
+    physicalDamageTaken: int | None = Field(None)
+    totalDamageDone: int | None = Field(None)
+    totalDamageDoneToChampions: int | None = Field(None)
+    totalDamageTaken: int | None = Field(None)
+    trueDamageDone: int | None = Field(None)
+    trueDamageDoneToChampions: int | None = Field(None)
+    trueDamageTaken: int | None = Field(None)
+
+    # PositionDto
+    x: int | None = Field(None)
+    y: int | None = Field(None)
+
+    frame_id: int | None = Field(None, foreign_key='frame.id')
+    frame: Frame | None = Relationship(back_populates='participant_frames')
+    participant: Participant | None = Relationship(back_populates='participant_frames')
+
+
 engine = create_engine(
     f'postgresql+psycopg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DB}',
     pool_recycle=3600
 )
 
 
-def create_db_and_tables():
+def drop_create_all():
     SQLModel.metadata.drop_all(engine)
     SQLModel.metadata.create_all(engine)
 
 
 if __name__ == "__main__":
-    create_db_and_tables()
+    drop_create_all()
