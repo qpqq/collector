@@ -52,7 +52,7 @@ class Region(StrEnum):
     def platform(self) -> 'Platform':
         return getattr(Platform, self.name)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return repr(self.value)
 
 
@@ -74,7 +74,7 @@ class Platform(StrEnum):
     taiwan = 'TW2'
     vietnam = 'VN2'
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return repr(self.value)
 
 
@@ -88,10 +88,10 @@ class Collector:
 
     # noinspection PyPep8Naming
     @property
-    def matchId(self):
+    def matchId(self) -> str:
         return f'{self.region}_{self.index}'
 
-    def get(self, method, *args, retry: int = 0, error: Exception = None, **kwargs):
+    def get(self, method, *args, retry: int = 0, error: Exception = None, **kwargs) -> MatchDto | TimelineDto | None:
         if retry > 2:
             logger.error('All retries are exceeded')
             raise error
@@ -136,7 +136,7 @@ class Collector:
             logger.warning(f'ConnectionError occurred while {retry} retry')
             return self.get(method, *args, retry=retry + 1, error=err, **kwargs)
 
-    def get_match_and_timeline(self):
+    def get_match_and_timeline(self) -> tuple[None, None] | tuple[MatchDto, None] | tuple[MatchDto, TimelineDto]:
         params = {
             'region': self.region.platform,
             'match_id': self.matchId
@@ -155,7 +155,7 @@ class Collector:
         return match, timeline
 
     @staticmethod
-    def _get_challenges(match: MatchDto, session: Session):
+    def _get_challenges(match: MatchDto, session: Session) -> dict[str, Challenge]:
         challenges = set()
         for participant in match.info.participants:
             if participant.challenges is None:
@@ -164,7 +164,7 @@ class Collector:
             for challenge in participant.challenges:
                 challenges.add(challenge)
 
-        challenges_name_to_challenge: dict[str, Challenge] = {}
+        challenges_name_to_challenge = {}
         for challenge in challenges:
             statement = insert(Challenge).values(name=challenge)
             # noinspection PyDeprecation
@@ -178,7 +178,7 @@ class Collector:
         return challenges_name_to_challenge
 
     @staticmethod
-    def _get_perks(participant: ParticipantDto):
+    def _get_perks(participant: ParticipantDto) -> list[Perk]:
         perks_db = []
         for perk in participant.perks.styles:
             for selection in perk.selections:
@@ -190,7 +190,9 @@ class Collector:
 
         return perks_db
 
-    def _get_participants(self, match: MatchDto, challenges_table: dict[str, Challenge], session: Session):
+    def _get_participants(
+            self, match: MatchDto, challenges_table: dict[str, Challenge], session: Session
+    ) -> list[Participant]:
         participants: list[Participant] = []
         for participant in match.info.participants:
 
@@ -217,7 +219,7 @@ class Collector:
         return participants
 
     @staticmethod
-    def _get_teams(match: MatchDto, participants: list[Participant]):
+    def _get_teams(match: MatchDto, participants: list[Participant]) -> list[Team]:
         teams: list[Team] = []
         for team in match.info.teams:
             team_db = Team.model_validate(team.model_dump())
@@ -246,7 +248,9 @@ class Collector:
         return teams
 
     @staticmethod
-    def _get_victim_damages_dealt(event: Event, participant_id_to_participant: dict[int, Participant]):
+    def _get_victim_damages_dealt(
+            event: Event, participant_id_to_participant: dict[int, Participant]
+    ) -> list[VictimDamageDealt]:
         victim_damages_dealt_db = []
         for victim_damage_dealt in event.victimDamageDealt:
             victim_damage_dealt_db = VictimDamageDealt.model_validate(
@@ -261,7 +265,9 @@ class Collector:
         return victim_damages_dealt_db
 
     @staticmethod
-    def _get_victim_damages_received(event: Event, participant_id_to_participant: dict[int, Participant]):
+    def _get_victim_damages_received(
+            event: Event, participant_id_to_participant: dict[int, Participant]
+    ) -> list[VictimDamageReceived]:
         victim_damages_received_db = []
         for victim_damage_received in event.victimDamageReceived:
             victim_damage_received_db = VictimDamageReceived.model_validate(
@@ -282,7 +288,7 @@ class Collector:
             frame: FramesTimeLineDto,
             participant_id_to_participant: dict[int, Participant],
             team_id_to_team: dict[int, Team]
-    ):
+    ) -> list[Event]:
         events_db = []
         for event in frame.events:
             event_db = Event.model_validate(event.model_dump())
@@ -318,7 +324,9 @@ class Collector:
         return events_db
 
     @staticmethod
-    def _get_participant_frames(frame: FramesTimeLineDto, participant_id_to_participant: dict[int, Participant]):
+    def _get_participant_frames(
+            frame: FramesTimeLineDto, participant_id_to_participant: dict[int, Participant]
+    ) -> list[ParticipantFrame]:
         participant_frames_db = []
         for participant_id, participant_frames in frame.participantFrames.items():
             participant_frame_db = ParticipantFrame.model_validate(
@@ -333,7 +341,9 @@ class Collector:
 
         return participant_frames_db
 
-    def _get_frames(self, timeline: TimelineDto, match: Match, participants: list[Participant], teams: list[Team]):
+    def _get_frames(
+            self, timeline: TimelineDto, match: Match, participants: list[Participant], teams: list[Team]
+    ) -> list[Frame]:
         participant_id_to_participant = {participant.participantId: participant for participant in participants}
         team_id_to_team = {team.teamId: team for team in teams}
 
@@ -349,7 +359,7 @@ class Collector:
         return frames_db
 
     # noinspection PyPep8Naming
-    def is_match_in_db(self):
+    def is_match_in_db(self) -> bool:
         with Session(engine) as session:
             # noinspection PyTypeChecker,Pydantic
             if session.exec(select(Match).where(Match.matchId == self.matchId)).one_or_none() is not None:

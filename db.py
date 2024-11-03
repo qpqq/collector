@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import List, Union
 
 from sqlmodel import SQLModel, Field, create_engine, Relationship
@@ -6,8 +6,13 @@ from sqlmodel import SQLModel, Field, create_engine, Relationship
 from config import POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_DB
 
 
+def utcnow() -> datetime:
+    return datetime.now(UTC)
+
+
 class Match(SQLModel, table=True):
     id: int | None = Field(None, primary_key=True)
+    inserted: datetime = Field(default_factory=utcnow)
 
     # MetadataDto
     dataVersion: str | None = Field(None, description='Match data version.')
@@ -50,9 +55,9 @@ class ChallengeParticipantLink(SQLModel, table=True):
     value: str | None = Field(None)
 
     challenge_id: int | None = Field(default=None, foreign_key='challenge.id', primary_key=True)
-    challenge: Union['Challenge', None] = Relationship(back_populates='participant_links')
+    challenge: 'Challenge' = Relationship(back_populates='participant_links')
     participant_id: int | None = Field(default=None, foreign_key='participant.id', primary_key=True)
-    participant: Union['Participant', None] = Relationship(back_populates='challenge_links')
+    participant: 'Participant' = Relationship(back_populates='challenge_links')
 
 
 class AssistingParticipantsLink(SQLModel, table=True):
@@ -225,7 +230,7 @@ class Participant(SQLModel, table=True):
     offenseStat: int | None = Field(None, alias='offense')
 
     match_id: int | None = Field(None, foreign_key='match.id')
-    match: Match | None = Relationship(back_populates='participants')
+    match: Match = Relationship(back_populates='participants')
     team: Union['Team', None] = Relationship(back_populates='participants')
 
     # dict[str, str]
@@ -262,7 +267,7 @@ class Missions(SQLModel, table=True):
     playerScore11: int | None = Field(None)
 
     participant_id: int | None = Field(None, foreign_key='participant.id')
-    participant: Participant | None = Relationship(back_populates='missions')
+    participant: Participant = Relationship(back_populates='missions')
 
 
 class Perk(SQLModel, table=True):
@@ -277,7 +282,7 @@ class Perk(SQLModel, table=True):
     var3: int | None = Field(None)
 
     participant_id: int | None = Field(None, foreign_key='participant.id')
-    participant: Participant | None = Relationship(back_populates='perks')
+    participant: Participant = Relationship(back_populates='perks')
 
 
 class Team(SQLModel, table=True):
@@ -306,7 +311,7 @@ class Team(SQLModel, table=True):
     bans: List['Ban'] | None = Relationship(back_populates='team')
 
     match_id: int | None = Field(None, foreign_key='match.id')
-    match: Match | None = Relationship(back_populates='teams')
+    match: Match = Relationship(back_populates='teams')
 
     # List[ParticipantDto]
     participants: List[Participant] | None = Relationship(back_populates='team')
@@ -319,7 +324,7 @@ class Ban(SQLModel, table=True):
     pickTurn: int | None = Field(None)
 
     team_id: int | None = Field(None, foreign_key='team.id')
-    team: Team | None = Relationship(back_populates='bans')
+    team: Team = Relationship(back_populates='bans')
 
 
 class Frame(SQLModel, table=True):
@@ -327,7 +332,7 @@ class Frame(SQLModel, table=True):
     timestamp: int | None = Field(None)
 
     match_id: int | None = Field(None, foreign_key='match.id')
-    match: Match | None = Relationship(back_populates='frames')
+    match: Match = Relationship(back_populates='frames')
 
     # List[EventsTimeLineDto]
     events: List['Event'] | None = Relationship(back_populates='frame')
@@ -388,7 +393,7 @@ class Event(SQLModel, table=True):
     assistingParticipants: List[Participant] | None = Relationship(link_model=AssistingParticipantsLink)
 
     frame_id: int | None = Field(None, foreign_key='frame.id')
-    frame: Frame | None = Relationship(back_populates='events')
+    frame: Frame = Relationship(back_populates='events')
 
 
 class VictimDamageDealt(SQLModel, table=True):
@@ -405,7 +410,7 @@ class VictimDamageDealt(SQLModel, table=True):
     type: str | None = Field(None)
 
     event_id: int | None = Field(None, foreign_key='event.id')
-    event: Event | None = Relationship(back_populates='victimDamageDealt')
+    event: Event = Relationship(back_populates='victimDamageDealt')
     participant: Participant | None = Relationship()
 
 
@@ -423,7 +428,7 @@ class VictimDamageReceived(SQLModel, table=True):
     type: str | None = Field(None)
 
     event_id: int | None = Field(None, foreign_key='event.id')
-    event: Event | None = Relationship(back_populates='victimDamageReceived')
+    event: Event = Relationship(back_populates='victimDamageReceived')
     participant: Participant | None = Relationship()
 
 
@@ -487,8 +492,8 @@ class ParticipantFrame(SQLModel, table=True):
     y: int | None = Field(None)
 
     frame_id: int | None = Field(None, foreign_key='frame.id')
-    frame: Frame | None = Relationship(back_populates='participant_frames')
-    participant: Participant | None = Relationship(back_populates='participant_frames')
+    frame: Frame = Relationship(back_populates='participant_frames')
+    participant: Participant = Relationship(back_populates='participant_frames')
 
 
 engine = create_engine(
