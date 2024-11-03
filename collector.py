@@ -1,5 +1,6 @@
 import sys
 import traceback
+from enum import StrEnum
 
 from requests import ConnectionError
 from riotwatcher import LolWatcher, ApiError
@@ -29,13 +30,66 @@ from models import MatchDto, TimelineDto, FramesTimeLineDto, ParticipantDto
 logger = get_logger(__name__)
 
 
+class Region(StrEnum):
+    brazil = 'BR'
+    europe_north_east = 'EUNE'
+    europe_west = 'EUW'
+    japan = 'JP'
+    korea = 'KR'
+    latin_america_north = 'LAN'
+    latin_america_south = 'LAS'
+    north_america = 'NA'
+    oceania = 'OCE'
+    turkey = 'TR'
+    russia = 'RU'
+    philippines = 'PH'
+    singapore = 'SG'
+    thailand = 'TH'
+    taiwan = 'TW'
+    vietnam = 'VN'
+
+    @property
+    def platform(self) -> 'Platform':
+        return getattr(Platform, self.name)
+
+    def __repr__(self):
+        return repr(self.value)
+
+
+class Platform(StrEnum):
+    brazil = 'BR1'
+    europe_north_east = 'EUN1'
+    europe_west = 'EUW1'
+    japan = 'JP1'
+    korea = 'KR'
+    latin_america_north = 'LA1'
+    latin_america_south = 'LA2'
+    north_america = 'NA1'
+    oceania = 'OC1'
+    turkey = 'TR1'
+    russia = 'RU'
+    philippines = 'PH2'
+    singapore = 'SG2'
+    thailand = 'TH2'
+    taiwan = 'TW2'
+    vietnam = 'VN2'
+
+    def __repr__(self):
+        return repr(self.value)
+
+
 class Collector:
-    def __init__(self, *, api_key: str, region: str):
+    def __init__(self, *, api_key: str, region: Region):
         self.region = region
         self.api = LolWatcher(api_key, deserializer=PydanticDeserializer())
 
         self.index = -1
         self.last_founded = self.index
+
+    # noinspection PyPep8Naming
+    @property
+    def matchId(self):
+        return f'{self.region}_{self.index}'
 
     def get(self, method, *args, retry: int = 0, error: Exception = None, **kwargs):
         if retry > 2:
@@ -84,8 +138,8 @@ class Collector:
 
     def get_match_and_timeline(self):
         params = {
-            'region': self.region,
-            'match_id': f'RU_{self.index}'
+            'region': self.region.platform,
+            'match_id': self.matchId
         }
 
         match: MatchDto = self.get(self.api.match.by_id, **params)
@@ -294,16 +348,21 @@ class Collector:
 
         return frames_db
 
+    # noinspection PyPep8Naming
+    def is_match_in_db(self):
+        with Session(engine) as session:
+            # noinspection PyTypeChecker,Pydantic
+            if session.exec(select(Match).where(Match.matchId == self.matchId)).one_or_none() is not None:
+                logger.warning(f'match with id = {self.index} and matchId = {self.matchId} already in db')
+                return True
+
+        return False
+
     def insert(self, match: MatchDto, timeline: TimelineDto):
         if match is None or timeline is None:
             return
 
         with Session(engine) as session:
-            # noinspection PyTypeChecker,Pydantic
-            if session.exec(select(Match).where(Match.matchId == match.metadata.matchId)).one_or_none() is not None:
-                logger.warning(f'match with id = {self.index} and matchId = {match.metadata.matchId} already in db')
-                return
-
             match_db = Match.model_validate(match.info.model_dump() | match.metadata.model_dump())
 
             challenges = self._get_challenges(match, session)
@@ -321,14 +380,15 @@ class Collector:
 
         logger.info(f'match and timeline with id = {self.index} are inserted')
 
-    def start(self, start: int):
-        self.index = start
+    def start(self, start_id: int):
+        self.index = start_id
         self.last_founded = self.index - 1
 
         while True:
             try:
-                match, timeline = self.get_match_and_timeline()
-                self.insert(match, timeline)
+                if not self.is_match_in_db():
+                    match, timeline = self.get_match_and_timeline()
+                    self.insert(match, timeline)
 
             except Exception as err:
                 logger.error(f'unexpected error {err}: {traceback.format_exc()}')
