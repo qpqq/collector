@@ -1,6 +1,5 @@
 import sys
 import traceback
-from enum import StrEnum
 
 from requests import ConnectionError
 from riotwatcher import LolWatcher, ApiError
@@ -24,58 +23,11 @@ from db import (
     VictimDamageDealt,
     VictimDamageReceived
 )
+from enums import Region
 from handlers import PydanticDeserializer
 from models import MatchDto, TimelineDto, FramesTimeLineDto, ParticipantDto
 
 logger = get_logger(__name__)
-
-
-class Region(StrEnum):
-    brazil = 'BR'
-    europe_north_east = 'EUNE'
-    europe_west = 'EUW'
-    japan = 'JP'
-    korea = 'KR'
-    latin_america_north = 'LAN'
-    latin_america_south = 'LAS'
-    north_america = 'NA'
-    oceania = 'OCE'
-    turkey = 'TR'
-    russia = 'RU'
-    philippines = 'PH'
-    singapore = 'SG'
-    thailand = 'TH'
-    taiwan = 'TW'
-    vietnam = 'VN'
-
-    @property
-    def platform(self) -> 'Platform':
-        return getattr(Platform, self.name)
-
-    def __repr__(self) -> str:
-        return repr(self.value)
-
-
-class Platform(StrEnum):
-    brazil = 'BR1'
-    europe_north_east = 'EUN1'
-    europe_west = 'EUW1'
-    japan = 'JP1'
-    korea = 'KR'
-    latin_america_north = 'LA1'
-    latin_america_south = 'LA2'
-    north_america = 'NA1'
-    oceania = 'OC1'
-    turkey = 'TR1'
-    russia = 'RU'
-    philippines = 'PH2'
-    singapore = 'SG2'
-    thailand = 'TH2'
-    taiwan = 'TW2'
-    vietnam = 'VN2'
-
-    def __repr__(self) -> str:
-        return repr(self.value)
 
 
 class Collector:

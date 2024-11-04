@@ -1,9 +1,11 @@
 from datetime import datetime, UTC
 from typing import List, Union
 
-from sqlmodel import SQLModel, Field, create_engine, Relationship
+from pydantic import field_validator
+from sqlmodel import SQLModel, Field, Column, Enum, create_engine, Relationship
 
 from config import POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_DB
+from enums import Region, GameMode, GameType, Lane, LaneDB, Role, Tower
 
 
 def utcnow() -> datetime:
@@ -24,13 +26,13 @@ class Match(SQLModel, table=True):
     gameDuration: int | None = None
     gameEndTimestamp: datetime | None = None
     gameId: int | None = None
-    gameMode: str | None = None
+    gameMode: GameMode | None = Field(None, sa_column=Column(Enum(GameMode)))
     gameName: str | None = None
     gameStartTimestamp: datetime | None = None
-    gameType: str | None = None
+    gameType: GameType | None = Field(None, sa_column=Column(Enum(GameType)))
     gameVersion: str | None = None
     mapId: int | None = None
-    platformId: str | None = None
+    platformId: Region | None = Field(None, sa_column=Column(Enum(Region)))
     queueId: int | None = None
     tournamentCode: str | None = None
 
@@ -95,7 +97,7 @@ class Participant(SQLModel, table=True):
     getBackPings: int | None = None
     goldEarned: int | None = None
     goldSpent: int | None = None
-    individualPosition: str | None = None
+    individualPosition: LaneDB | None = Field(None, sa_column=Column(Enum(LaneDB)))
     inhibitorKills: int | None = None
     inhibitorTakedowns: int | None = None
     inhibitorsLost: int | None = None
@@ -109,7 +111,7 @@ class Participant(SQLModel, table=True):
     itemsPurchased: int | None = None
     killingSprees: int | None = None
     kills: int | None = None
-    lane: str | None = None
+    lane: LaneDB | None = Field(None, sa_column=Column(Enum(LaneDB)))
     largestCriticalStrike: int | None = None
     largestKillingSpree: int | None = None
     largestMultiKill: int | None = None
@@ -156,7 +158,7 @@ class Participant(SQLModel, table=True):
     quadraKills: int | None = None
     riotIdGameName: str | None = None
     riotIdTagline: str | None = None
-    role: str | None = None
+    role: Role | None = Field(None, sa_column=Column(Enum(Role)))
     sightWardsBoughtInGame: int | None = None
     spell1Casts: int | None = None
     spell2Casts: int | None = None
@@ -172,7 +174,7 @@ class Participant(SQLModel, table=True):
     summonerName: str | None = None
     teamEarlySurrendered: bool | None = None
     teamId: int | None = Field(None, foreign_key='team.id')
-    teamPosition: str | None = None
+    teamPosition: LaneDB | None = Field(None, sa_column=Column(Enum(LaneDB)))
     timeCCingOthers: int | None = None
     timePlayed: int | None = None
     totalAllyJungleMinionsKilled: int | None = None
@@ -213,6 +215,10 @@ class Participant(SQLModel, table=True):
     defenseStat: int | None = Field(None, alias='defense')
     flexStat: int | None = Field(None, alias='flex')
     offenseStat: int | None = Field(None, alias='offense')
+
+    @field_validator('individualPosition', 'lane', 'teamPosition', mode='before')
+    def convert_values_to_str(cls, position: Lane | None) -> LaneDB | None:
+        return LaneDB.from_lane(position)
 
     match_id: int | None = Field(None, foreign_key='match.id')
     match: Match = Relationship(back_populates='participants')
@@ -352,7 +358,7 @@ class Event(SQLModel, table=True):
     victimId: int | None = Field(None, foreign_key='participant.id')
     teamId: int | None = Field(None, foreign_key='team.id')
     buildingType: str | None = None
-    towerType: str | None = None
+    towerType: Tower | None = Field(None, sa_column=Column(Enum(Tower)))
     laneType: str | None = None
     killType: str | None = None
     multiKillLength: int | None = None

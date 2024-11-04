@@ -2,6 +2,8 @@ from typing import List
 
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 
+from enums import GameMode, GameType, Lane, Role, Tower, Region
+
 
 # Match models
 
@@ -127,8 +129,8 @@ class ParticipantDto(BaseModel):
     getBackPings: int | None = Field(None, description='Yellow circle with horizontal line')
     goldEarned: int | None = Field(None)
     goldSpent: int | None = Field(None)
-    individualPosition: str | None = Field(None,
-                                           description='Both individualPosition and teamPosition are computed by the game server and are different versions of the most likely position played by a player. The individualPosition is the best guess for which position the player actually played in isolation of anything else. The teamPosition is the best guess for which position the player actually played if we add the constraint that each team must have one top player, one jungle, one middle, etc. Generally the recommendation is to use the teamPosition field over the individualPosition field.')
+    individualPosition: Lane | None = Field(None,
+                                            description='Both individualPosition and teamPosition are computed by the game server and are different versions of the most likely position played by a player. The individualPosition is the best guess for which position the player actually played in isolation of anything else. The teamPosition is the best guess for which position the player actually played if we add the constraint that each team must have one top player, one jungle, one middle, etc. Generally the recommendation is to use the teamPosition field over the individualPosition field.')
     inhibitorKills: int | None = Field(None)
     inhibitorTakedowns: int | None = Field(None)
     inhibitorsLost: int | None = Field(None)
@@ -142,7 +144,7 @@ class ParticipantDto(BaseModel):
     itemsPurchased: int | None = Field(None)
     killingSprees: int | None = Field(None)
     kills: int | None = Field(None)
-    lane: str | None = Field(None)
+    lane: Lane | None = Field(None)
     largestCriticalStrike: int | None = Field(None)
     largestKillingSpree: int | None = Field(None)
     largestMultiKill: int | None = Field(None)
@@ -192,7 +194,7 @@ class ParticipantDto(BaseModel):
     quadraKills: int | None = Field(None)
     riotIdGameName: str | None = Field(None)
     riotIdTagline: str | None = Field(None)
-    role: str | None = Field(None)
+    role: Role | None = Field(None)
     sightWardsBoughtInGame: int | None = Field(None)
     spell1Casts: int | None = Field(None)
     spell2Casts: int | None = Field(None)
@@ -208,8 +210,8 @@ class ParticipantDto(BaseModel):
     summonerName: str | None = Field(None)
     teamEarlySurrendered: bool | None = Field(None)
     teamId: int | None = Field(None)
-    teamPosition: str | None = Field(None,
-                                     description='Both individualPosition and teamPosition are computed by the game server and are different versions of the most likely position played by a player. The individualPosition is the best guess for which position the player actually played in isolation of anything else. The teamPosition is the best guess for which position the player actually played if we add the constraint that each team must have one top player, one jungle, one middle, etc. Generally the recommendation is to use the teamPosition field over the individualPosition field.')
+    teamPosition: Lane | None = Field(None,
+                                      description='Both individualPosition and teamPosition are computed by the game server and are different versions of the most likely position played by a player. The individualPosition is the best guess for which position the player actually played in isolation of anything else. The teamPosition is the best guess for which position the player actually played if we add the constraint that each team must have one top player, one jungle, one middle, etc. Generally the recommendation is to use the teamPosition field over the individualPosition field.')
     timeCCingOthers: int | None = Field(None)
     timePlayed: int | None = Field(None)
     totalAllyJungleMinionsKilled: int | None = Field(None)
@@ -267,15 +269,15 @@ class InfoDto(BaseModel):
     gameEndTimestamp: int | None = Field(None,
                                          description='Unix timestamp for when match ends on the game server. This timestamp can occasionally be significantly longer than when the match "ends". The most reliable way of determining the timestamp for the end of the match would be to add the max time played of any participant to the gameStartTimestamp. This field was added to match-v5 in patch 11.20 on Oct 5th, 2021.')
     gameId: int | None = Field(None)
-    gameMode: str | None = Field(None, description='Refer to the Game Constants documentation.')
+    gameMode: GameMode | None = Field(None, description='Refer to the Game Constants documentation.')
     gameName: str | None = Field(None)
     gameStartTimestamp: int | None = Field(None, description='Unix timestamp for when match starts on the game server.')
-    gameType: str | None = Field(None)
+    gameType: GameType | None = Field(None)
     gameVersion: str | None = Field(None,
                                     description='The first two parts can be used to determine the patch a game was played on.')
     mapId: int | None = Field(None, description='Refer to the Game Constants documentation.')
     participants: List[ParticipantDto] | None = Field(None)
-    platformId: str | None = Field(None, description='Platform where the match was played.')
+    platformId: Region | None = Field(None, description='Platform where the match was played.')
     queueId: int | None = Field(None, description='Refer to the Game Constants documentation.')
     teams: List[TeamDto] | None = Field(None)
     tournamentCode: str | None = Field(None,
@@ -425,7 +427,7 @@ class EventsTimeLineDto(BaseModel):
     assistingParticipantIds: List[int] | None = Field(None)  # CHAMPION_KILL, BUILDING_KILL, ELITE_MONSTER_KILL
     teamId: int | None = Field(None)  # BUILDING_KILL, TURRET_PLATE_DESTROYED, ELITE_MONSTER_KILL
     buildingType: str | None = Field(None)  # BUILDING_KILL
-    towerType: str | None = Field(None)  # BUILDING_KILL
+    towerType: Tower | None = Field(None)  # BUILDING_KILL
     laneType: str | None = Field(None)  # TURRET_PLATE_DESTROYED, BUILDING_KILL
     killType: str | None = Field(None)  # CHAMPION_SPECIAL_KILL
     multiKillLength: int | None = Field(None)  # CHAMPION_SPECIAL_KILL
