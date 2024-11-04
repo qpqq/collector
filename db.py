@@ -15,30 +15,24 @@ class Match(SQLModel, table=True):
     inserted: datetime = Field(default_factory=utcnow)
 
     # MetadataDto
-    dataVersion: str | None = Field(None, description='Match data version.')
-    matchId: str | None = Field(None, description='Match id.', unique=True)  # Unique constraint added
+    dataVersion: str | None = Field(None)
+    matchId: str | None = Field(None, unique=True)  # Unique constraint added
 
     # InfoDto
-    endOfGameResult: str | None = Field(None, description='Refer to indicate if the game ended in termination.')
-    gameCreation: datetime | None = Field(None,
-                                          description='Unix timestamp for when the game is created on the game server (i.e., the loading screen).')
-    gameDuration: int | None = Field(None,
-                                     description='Prior to patch 11.20, this field returns the game length in milliseconds calculated from gameEndTimestamp - gameStartTimestamp. Post patch 11.20, this field returns the max timePlayed of any participant in the game in seconds, which makes the behavior of this field consistent with that of match-v4. The best way to handling the change in this field is to treat the value as milliseconds if the gameEndTimestamp field isn\'t in the response and to treat the value as seconds if gameEndTimestamp is in the response.')
-    gameEndTimestamp: datetime | None = Field(None,
-                                              description='Unix timestamp for when match ends on the game server. This timestamp can occasionally be significantly longer than when the match "ends". The most reliable way of determining the timestamp for the end of the match would be to add the max time played of any participant to the gameStartTimestamp. This field was added to match-v5 in patch 11.20 on Oct 5th, 2021.')
+    endOfGameResult: str | None = Field(None)
+    gameCreation: datetime | None = Field(None)
+    gameDuration: int | None = Field(None)
+    gameEndTimestamp: datetime | None = Field(None)
     gameId: int | None = Field(None)
-    gameMode: str | None = Field(None, description='Refer to the Game Constants documentation.')
+    gameMode: str | None = Field(None)
     gameName: str | None = Field(None)
-    gameStartTimestamp: datetime | None = Field(None,
-                                                description='Unix timestamp for when match starts on the game server.')
+    gameStartTimestamp: datetime | None = Field(None)
     gameType: str | None = Field(None)
-    gameVersion: str | None = Field(None,
-                                    description='The first two parts can be used to determine the patch a game was played on.')
-    mapId: int | None = Field(None, description='Refer to the Game Constants documentation.')
-    platformId: str | None = Field(None, description='Platform where the match was played.')
-    queueId: int | None = Field(None, description='Refer to the Game Constants documentation.')
-    tournamentCode: str | None = Field(None,
-                                       description='Tournament code used to generate the match. This field was added to match-v5 in patch 11.13 on June 23rd, 2021.')
+    gameVersion: str | None = Field(None)
+    mapId: int | None = Field(None)
+    platformId: str | None = Field(None)
+    queueId: int | None = Field(None)
+    tournamentCode: str | None = Field(None)
 
     # InfoTimeLineDto
     frameInterval: int | None = Field(None)
@@ -68,19 +62,17 @@ class AssistingParticipantsLink(SQLModel, table=True):
 class Participant(SQLModel, table=True):
     id: int | None = Field(None, primary_key=True)
 
-    allInPings: int | None = Field(None, description='Yellow crossed swords')
-    assistMePings: int | None = Field(None, description='Green flag')
+    allInPings: int | None = Field(None)
+    assistMePings: int | None = Field(None)
     assists: int | None = Field(None)
     baronKills: int | None = Field(None)
     bountyLevel: int | None = Field(None)
     champExperience: int | None = Field(None)
     champLevel: int | None = Field(None)
-    championId: int | None = Field(None,
-                                   description='Prior to patch 11.4, on Feb 18th, 2021, this field returned invalid championIds. We recommend determining the champion based on the championName field for matches played prior to patch 11.4.')
+    championId: int | None = Field(None)
     championName: str | None = Field(None)
-    commandPings: int | None = Field(None, description='Blue generic ping (ALT+click)')
-    championTransform: int | None = Field(None,
-                                          description='This field is currently only utilized for Kayn\'s transformations. (Legal values: 0 - None, 1 - Slayer, 2 - Assassin)')
+    commandPings: int | None = Field(None)
+    championTransform: int | None = Field(None)
     consumablesPurchased: int | None = Field(None)
     damageDealtToBuildings: int | None = Field(None)
     damageDealtToObjectives: int | None = Field(None)
@@ -91,21 +83,19 @@ class Participant(SQLModel, table=True):
     doubleKills: int | None = Field(None)
     dragonKills: int | None = Field(None)
     eligibleForProgression: bool | None = Field(None)
-    enemyMissingPings: int | None = Field(None, description='Yellow questionmark')
-    enemyVisionPings: int | None = Field(None, description='Red eyeball')
+    enemyMissingPings: int | None = Field(None)
+    enemyVisionPings: int | None = Field(None)
     firstBloodAssist: bool | None = Field(None)
     firstBloodKill: bool | None = Field(None)
     firstTowerAssist: bool | None = Field(None)
     firstTowerKill: bool | None = Field(None)
-    gameEndedInEarlySurrender: bool | None = Field(None,
-                                                   description='This is an offshoot of the OneStone challenge. The code checks if a spell with the same instance ID does the final point of damage to at least 2 Champions. It doesn\'t matter if they\'re enemies, but you cannot hurt your friends.')
+    gameEndedInEarlySurrender: bool | None = Field(None)
     gameEndedInSurrender: bool | None = Field(None)
     holdPings: int | None = Field(None)
-    getBackPings: int | None = Field(None, description='Yellow circle with horizontal line')
+    getBackPings: int | None = Field(None)
     goldEarned: int | None = Field(None)
     goldSpent: int | None = Field(None)
-    individualPosition: str | None = Field(None,
-                                           description='Both individualPosition and teamPosition are computed by the game server and are different versions of the most likely position played by a player. The individualPosition is the best guess for which position the player actually played in isolation of anything else. The teamPosition is the best guess for which position the player actually played if we add the constraint that each team must have one top player, one jungle, one middle, etc. Generally the recommendation is to use the teamPosition field over the individualPosition field.')
+    individualPosition: str | None = Field(None)
     inhibitorKills: int | None = Field(None)
     inhibitorTakedowns: int | None = Field(None)
     inhibitorsLost: int | None = Field(None)
@@ -127,15 +117,14 @@ class Participant(SQLModel, table=True):
     magicDamageDealt: int | None = Field(None)
     magicDamageDealtToChampions: int | None = Field(None)
     magicDamageTaken: int | None = Field(None)
-    neutralMinionsKilled: int | None = Field(None,
-                                             description='neutralMinionsKilled = mNeutralMinionsKilled, which is incremented on kills of kPet and kJungleMonster')
-    needVisionPings: int | None = Field(None, description='Green ward')
+    neutralMinionsKilled: int | None = Field(None)
+    needVisionPings: int | None = Field(None)
     nexusKills: int | None = Field(None)
     nexusTakedowns: int | None = Field(None)
     nexusLost: int | None = Field(None)
     objectivesStolen: int | None = Field(None)
     objectivesStolenAssists: int | None = Field(None)
-    onMyWayPings: int | None = Field(None, description='Blue arrow pointing at ground')
+    onMyWayPings: int | None = Field(None)
     participantId: int | None = Field(None)
     playerScore0: int | None = Field(None)
     playerScore1: int | None = Field(None)
@@ -161,7 +150,7 @@ class Participant(SQLModel, table=True):
     playerAugment5: int | None = Field(None)
     playerAugment6: int | None = Field(None)
     playerSubteamId: int | None = Field(None)
-    pushPings: int | None = Field(None, description='Green minion')
+    pushPings: int | None = Field(None)
     profileIcon: int | None = Field(None)
     puuid: str | None = Field(None)
     quadraKills: int | None = Field(None)
@@ -183,8 +172,7 @@ class Participant(SQLModel, table=True):
     summonerName: str | None = Field(None)
     teamEarlySurrendered: bool | None = Field(None)
     teamId: int | None = Field(None, foreign_key='team.id')
-    teamPosition: str | None = Field(None,
-                                     description='Both individualPosition and teamPosition are computed by the game server and are different versions of the most likely position played by a player. The individualPosition is the best guess for which position the player actually played in isolation of anything else. The teamPosition is the best guess for which position the player actually played if we add the constraint that each team must have one top player, one jungle, one middle, etc. Generally the recommendation is to use the teamPosition field over the individualPosition field.')
+    teamPosition: str | None = Field(None)
     timeCCingOthers: int | None = Field(None)
     timePlayed: int | None = Field(None)
     totalAllyJungleMinionsKilled: int | None = Field(None)
@@ -193,12 +181,9 @@ class Participant(SQLModel, table=True):
     totalDamageShieldedOnTeammates: int | None = Field(None)
     totalDamageTaken: int | None = Field(None)
     totalEnemyJungleMinionsKilled: int | None = Field(None)
-    totalHeal: int | None = Field(None,
-                                  description='Whenever positive health is applied (which translates to all heals in the game but not things like regeneration), totalHeal is incremented by the amount of health received. This includes healing enemies, jungle monsters, yourself, etc')
-    totalHealsOnTeammates: int | None = Field(None,
-                                              description='Whenever positive health is applied (which translates to all heals in the game but not things like regeneration), totalHealsOnTeammates is incremented by the amount of health received.  This is post modified, so if you heal someone missing 5 health for 100 you will get +5 totalHealsOnTeammates')
-    totalMinionsKilled: int | None = Field(None,
-                                           description='totalMillionsKilled = mMinionsKilled, which is only incremented on kills of kTeamMinion, kMeleeLaneMinion, kSuperLaneMinion, kRangedLaneMinion and kSiegeLaneMinion')
+    totalHeal: int | None = Field(None)
+    totalHealsOnTeammates: int | None = Field(None)
+    totalMinionsKilled: int | None = Field(None)
     totalTimeCCDealt: int | None = Field(None)
     totalTimeSpentDead: int | None = Field(None)
     totalUnitsHealed: int | None = Field(None)
