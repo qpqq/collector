@@ -8,85 +8,85 @@ from enums import GameMode, GameType, Lane, Role, Tower, Region
 # Match models
 
 class ObjectiveDto(BaseModel):
-    first: bool | None = Field(None)
-    kills: int | None = Field(None)
+    first: bool | None = None
+    kills: int | None = None
 
     model_config = ConfigDict(extra='forbid')
 
 
 class ObjectivesDto(BaseModel):
-    baron: ObjectiveDto | None = Field(None)
-    champion: ObjectiveDto | None = Field(None)
-    dragon: ObjectiveDto | None = Field(None)
-    horde: ObjectiveDto | None = Field(None)
-    inhibitor: ObjectiveDto | None = Field(None)
-    riftHerald: ObjectiveDto | None = Field(None)
-    tower: ObjectiveDto | None = Field(None)
+    baron: ObjectiveDto | None = None
+    champion: ObjectiveDto | None = None
+    dragon: ObjectiveDto | None = None
+    horde: ObjectiveDto | None = None
+    inhibitor: ObjectiveDto | None = None
+    riftHerald: ObjectiveDto | None = None
+    tower: ObjectiveDto | None = None
 
     model_config = ConfigDict(extra='forbid')
 
 
 class BanDto(BaseModel):
-    championId: int | None = Field(None)
-    pickTurn: int | None = Field(None)
+    championId: int | None = None
+    pickTurn: int | None = None
 
     model_config = ConfigDict(extra='forbid')
 
 
 class TeamDto(BaseModel):
-    bans: List[BanDto] | None = Field(None)
-    objectives: ObjectivesDto | None = Field(None)
-    teamId: int | None = Field(None)
-    win: bool | None = Field(None)
+    bans: List[BanDto] | None = None
+    objectives: ObjectivesDto | None = None
+    teamId: int | None = None
+    win: bool | None = None
 
     model_config = ConfigDict(extra='forbid')
 
 
 class PerkStyleSelectionDto(BaseModel):
-    perk: int | None = Field(None)
-    var1: int | None = Field(None)
-    var2: int | None = Field(None)
-    var3: int | None = Field(None)
+    perk: int | None = None
+    var1: int | None = None
+    var2: int | None = None
+    var3: int | None = None
 
     model_config = ConfigDict(extra='forbid')
 
 
 class PerkStyleDto(BaseModel):
-    description: str | None = Field(None)
-    selections: List[PerkStyleSelectionDto] | None = Field(None)
-    style: int | None = Field(None)
+    description: str | None = None
+    selections: List[PerkStyleSelectionDto] | None = None
+    style: int | None = None
 
     model_config = ConfigDict(extra='forbid')
 
 
 class PerkStatsDto(BaseModel):
-    defense: int | None = Field(None)
-    flex: int | None = Field(None)
-    offense: int | None = Field(None)
+    defense: int | None = None
+    flex: int | None = None
+    offense: int | None = None
 
     model_config = ConfigDict(extra='forbid')
 
 
 class PerksDto(BaseModel):
-    statPerks: PerkStatsDto | None = Field(None)
-    styles: List[PerkStyleDto] | None = Field(None)
+    statPerks: PerkStatsDto | None = None
+    styles: List[PerkStyleDto] | None = None
 
     model_config = ConfigDict(extra='forbid')
 
 
 class MissionsDto(BaseModel):
-    playerScore0: int | None = Field(None)
-    playerScore1: int | None = Field(None)
-    playerScore2: int | None = Field(None)
-    playerScore3: int | None = Field(None)
-    playerScore4: int | None = Field(None)
-    playerScore5: int | None = Field(None)
-    playerScore6: int | None = Field(None)
-    playerScore7: int | None = Field(None)
-    playerScore8: int | None = Field(None)
-    playerScore9: int | None = Field(None)
-    playerScore10: int | None = Field(None)
-    playerScore11: int | None = Field(None)
+    playerScore0: int | None = None
+    playerScore1: int | None = None
+    playerScore2: int | None = None
+    playerScore3: int | None = None
+    playerScore4: int | None = None
+    playerScore5: int | None = None
+    playerScore6: int | None = None
+    playerScore7: int | None = None
+    playerScore8: int | None = None
+    playerScore9: int | None = None
+    playerScore10: int | None = None
+    playerScore11: int | None = None
 
     model_config = ConfigDict(extra='forbid')
 
@@ -94,155 +94,155 @@ class MissionsDto(BaseModel):
 class ParticipantDto(BaseModel):
     allInPings: int | None = Field(None, description='Yellow crossed swords')
     assistMePings: int | None = Field(None, description='Green flag')
-    assists: int | None = Field(None)
-    baronKills: int | None = Field(None)
-    bountyLevel: int | None = Field(None)
-    champExperience: int | None = Field(None)
-    champLevel: int | None = Field(None)
+    assists: int | None = None
+    baronKills: int | None = None
+    bountyLevel: int | None = None
+    champExperience: int | None = None
+    champLevel: int | None = None
     championId: int | None = Field(None,
                                    description='Prior to patch 11.4, on Feb 18th, 2021, this field returned invalid championIds. We recommend determining the champion based on the championName field for matches played prior to patch 11.4.')
-    championName: str | None = Field(None)
+    championName: str | None = None
     commandPings: int | None = Field(None, description='Blue generic ping (ALT+click)')
     championTransform: int | None = Field(None,
                                           description='This field is currently only utilized for Kayn\'s transformations. (Legal values: 0 - None, 1 - Slayer, 2 - Assassin)')
-    consumablesPurchased: int | None = Field(None)
-    challenges: dict[str, str] | None = Field(None)  # ChallengesDto
-    damageDealtToBuildings: int | None = Field(None)
-    damageDealtToObjectives: int | None = Field(None)
-    damageDealtToTurrets: int | None = Field(None)
-    damageSelfMitigated: int | None = Field(None)
-    deaths: int | None = Field(None)
-    detectorWardsPlaced: int | None = Field(None)
-    doubleKills: int | None = Field(None)
-    dragonKills: int | None = Field(None)
-    eligibleForProgression: bool | None = Field(None)
+    consumablesPurchased: int | None = None
+    challenges: dict[str, str] | None = None  # ChallengesDto
+    damageDealtToBuildings: int | None = None
+    damageDealtToObjectives: int | None = None
+    damageDealtToTurrets: int | None = None
+    damageSelfMitigated: int | None = None
+    deaths: int | None = None
+    detectorWardsPlaced: int | None = None
+    doubleKills: int | None = None
+    dragonKills: int | None = None
+    eligibleForProgression: bool | None = None
     enemyMissingPings: int | None = Field(None, description='Yellow questionmark')
     enemyVisionPings: int | None = Field(None, description='Red eyeball')
-    firstBloodAssist: bool | None = Field(None)
-    firstBloodKill: bool | None = Field(None)
-    firstTowerAssist: bool | None = Field(None)
-    firstTowerKill: bool | None = Field(None)
+    firstBloodAssist: bool | None = None
+    firstBloodKill: bool | None = None
+    firstTowerAssist: bool | None = None
+    firstTowerKill: bool | None = None
     gameEndedInEarlySurrender: bool | None = Field(None,
                                                    description='This is an offshoot of the OneStone challenge. The code checks if a spell with the same instance ID does the final point of damage to at least 2 Champions. It doesn\'t matter if they\'re enemies, but you cannot hurt your friends.')
-    gameEndedInSurrender: bool | None = Field(None)
-    holdPings: int | None = Field(None)
+    gameEndedInSurrender: bool | None = None
+    holdPings: int | None = None
     getBackPings: int | None = Field(None, description='Yellow circle with horizontal line')
-    goldEarned: int | None = Field(None)
-    goldSpent: int | None = Field(None)
+    goldEarned: int | None = None
+    goldSpent: int | None = None
     individualPosition: Lane | None = Field(None,
                                             description='Both individualPosition and teamPosition are computed by the game server and are different versions of the most likely position played by a player. The individualPosition is the best guess for which position the player actually played in isolation of anything else. The teamPosition is the best guess for which position the player actually played if we add the constraint that each team must have one top player, one jungle, one middle, etc. Generally the recommendation is to use the teamPosition field over the individualPosition field.')
-    inhibitorKills: int | None = Field(None)
-    inhibitorTakedowns: int | None = Field(None)
-    inhibitorsLost: int | None = Field(None)
-    item0: int | None = Field(None)
-    item1: int | None = Field(None)
-    item2: int | None = Field(None)
-    item3: int | None = Field(None)
-    item4: int | None = Field(None)
-    item5: int | None = Field(None)
-    item6: int | None = Field(None)
-    itemsPurchased: int | None = Field(None)
-    killingSprees: int | None = Field(None)
-    kills: int | None = Field(None)
-    lane: Lane | None = Field(None)
-    largestCriticalStrike: int | None = Field(None)
-    largestKillingSpree: int | None = Field(None)
-    largestMultiKill: int | None = Field(None)
-    longestTimeSpentLiving: int | None = Field(None)
-    magicDamageDealt: int | None = Field(None)
-    magicDamageDealtToChampions: int | None = Field(None)
-    magicDamageTaken: int | None = Field(None)
-    missions: MissionsDto | None = Field(None)
+    inhibitorKills: int | None = None
+    inhibitorTakedowns: int | None = None
+    inhibitorsLost: int | None = None
+    item0: int | None = None
+    item1: int | None = None
+    item2: int | None = None
+    item3: int | None = None
+    item4: int | None = None
+    item5: int | None = None
+    item6: int | None = None
+    itemsPurchased: int | None = None
+    killingSprees: int | None = None
+    kills: int | None = None
+    lane: Lane | None = None
+    largestCriticalStrike: int | None = None
+    largestKillingSpree: int | None = None
+    largestMultiKill: int | None = None
+    longestTimeSpentLiving: int | None = None
+    magicDamageDealt: int | None = None
+    magicDamageDealtToChampions: int | None = None
+    magicDamageTaken: int | None = None
+    missions: MissionsDto | None = None
     neutralMinionsKilled: int | None = Field(None,
                                              description='neutralMinionsKilled = mNeutralMinionsKilled, which is incremented on kills of kPet and kJungleMonster')
     needVisionPings: int | None = Field(None, description='Green ward')
-    nexusKills: int | None = Field(None)
-    nexusTakedowns: int | None = Field(None)
-    nexusLost: int | None = Field(None)
-    objectivesStolen: int | None = Field(None)
-    objectivesStolenAssists: int | None = Field(None)
+    nexusKills: int | None = None
+    nexusTakedowns: int | None = None
+    nexusLost: int | None = None
+    objectivesStolen: int | None = None
+    objectivesStolenAssists: int | None = None
     onMyWayPings: int | None = Field(None, description='Blue arrow pointing at ground')
-    participantId: int | None = Field(None)
-    playerScore0: int | None = Field(None)
-    playerScore1: int | None = Field(None)
-    playerScore2: int | None = Field(None)
-    playerScore3: int | None = Field(None)
-    playerScore4: int | None = Field(None)
-    playerScore5: int | None = Field(None)
-    playerScore6: int | None = Field(None)
-    playerScore7: int | None = Field(None)
-    playerScore8: int | None = Field(None)
-    playerScore9: int | None = Field(None)
-    playerScore10: int | None = Field(None)
-    playerScore11: int | None = Field(None)
-    pentaKills: int | None = Field(None)
-    perks: PerksDto | None = Field(None)
-    physicalDamageDealt: int | None = Field(None)
-    physicalDamageDealtToChampions: int | None = Field(None)
-    physicalDamageTaken: int | None = Field(None)
-    placement: int | None = Field(None)
-    playerAugment1: int | None = Field(None)
-    playerAugment2: int | None = Field(None)
-    playerAugment3: int | None = Field(None)
-    playerAugment4: int | None = Field(None)
-    playerAugment5: int | None = Field(None)
-    playerAugment6: int | None = Field(None)
-    playerSubteamId: int | None = Field(None)
+    participantId: int | None = None
+    playerScore0: int | None = None
+    playerScore1: int | None = None
+    playerScore2: int | None = None
+    playerScore3: int | None = None
+    playerScore4: int | None = None
+    playerScore5: int | None = None
+    playerScore6: int | None = None
+    playerScore7: int | None = None
+    playerScore8: int | None = None
+    playerScore9: int | None = None
+    playerScore10: int | None = None
+    playerScore11: int | None = None
+    pentaKills: int | None = None
+    perks: PerksDto | None = None
+    physicalDamageDealt: int | None = None
+    physicalDamageDealtToChampions: int | None = None
+    physicalDamageTaken: int | None = None
+    placement: int | None = None
+    playerAugment1: int | None = None
+    playerAugment2: int | None = None
+    playerAugment3: int | None = None
+    playerAugment4: int | None = None
+    playerAugment5: int | None = None
+    playerAugment6: int | None = None
+    playerSubteamId: int | None = None
     pushPings: int | None = Field(None, description='Green minion')
-    profileIcon: int | None = Field(None)
-    puuid: str | None = Field(None)
-    quadraKills: int | None = Field(None)
-    riotIdGameName: str | None = Field(None)
-    riotIdTagline: str | None = Field(None)
-    role: Role | None = Field(None)
-    sightWardsBoughtInGame: int | None = Field(None)
-    spell1Casts: int | None = Field(None)
-    spell2Casts: int | None = Field(None)
-    spell3Casts: int | None = Field(None)
-    spell4Casts: int | None = Field(None)
-    subteamPlacement: int | None = Field(None)
-    summoner1Casts: int | None = Field(None)
-    summoner1Id: int | None = Field(None)
-    summoner2Casts: int | None = Field(None)
-    summoner2Id: int | None = Field(None)
-    summonerId: str | None = Field(None)
-    summonerLevel: int | None = Field(None)
-    summonerName: str | None = Field(None)
-    teamEarlySurrendered: bool | None = Field(None)
-    teamId: int | None = Field(None)
+    profileIcon: int | None = None
+    puuid: str | None = None
+    quadraKills: int | None = None
+    riotIdGameName: str | None = None
+    riotIdTagline: str | None = None
+    role: Role | None = None
+    sightWardsBoughtInGame: int | None = None
+    spell1Casts: int | None = None
+    spell2Casts: int | None = None
+    spell3Casts: int | None = None
+    spell4Casts: int | None = None
+    subteamPlacement: int | None = None
+    summoner1Casts: int | None = None
+    summoner1Id: int | None = None
+    summoner2Casts: int | None = None
+    summoner2Id: int | None = None
+    summonerId: str | None = None
+    summonerLevel: int | None = None
+    summonerName: str | None = None
+    teamEarlySurrendered: bool | None = None
+    teamId: int | None = None
     teamPosition: Lane | None = Field(None,
                                       description='Both individualPosition and teamPosition are computed by the game server and are different versions of the most likely position played by a player. The individualPosition is the best guess for which position the player actually played in isolation of anything else. The teamPosition is the best guess for which position the player actually played if we add the constraint that each team must have one top player, one jungle, one middle, etc. Generally the recommendation is to use the teamPosition field over the individualPosition field.')
-    timeCCingOthers: int | None = Field(None)
-    timePlayed: int | None = Field(None)
-    totalAllyJungleMinionsKilled: int | None = Field(None)
-    totalDamageDealt: int | None = Field(None)
-    totalDamageDealtToChampions: int | None = Field(None)
-    totalDamageShieldedOnTeammates: int | None = Field(None)
-    totalDamageTaken: int | None = Field(None)
-    totalEnemyJungleMinionsKilled: int | None = Field(None)
+    timeCCingOthers: int | None = None
+    timePlayed: int | None = None
+    totalAllyJungleMinionsKilled: int | None = None
+    totalDamageDealt: int | None = None
+    totalDamageDealtToChampions: int | None = None
+    totalDamageShieldedOnTeammates: int | None = None
+    totalDamageTaken: int | None = None
+    totalEnemyJungleMinionsKilled: int | None = None
     totalHeal: int | None = Field(None,
                                   description='Whenever positive health is applied (which translates to all heals in the game but not things like regeneration), totalHeal is incremented by the amount of health received. This includes healing enemies, jungle monsters, yourself, etc')
     totalHealsOnTeammates: int | None = Field(None,
                                               description='Whenever positive health is applied (which translates to all heals in the game but not things like regeneration), totalHealsOnTeammates is incremented by the amount of health received.  This is post modified, so if you heal someone missing 5 health for 100 you will get +5 totalHealsOnTeammates')
     totalMinionsKilled: int | None = Field(None,
                                            description='totalMillionsKilled = mMinionsKilled, which is only incremented on kills of kTeamMinion, kMeleeLaneMinion, kSuperLaneMinion, kRangedLaneMinion and kSiegeLaneMinion')
-    totalTimeCCDealt: int | None = Field(None)
-    totalTimeSpentDead: int | None = Field(None)
-    totalUnitsHealed: int | None = Field(None)
-    tripleKills: int | None = Field(None)
-    trueDamageDealt: int | None = Field(None)
-    trueDamageDealtToChampions: int | None = Field(None)
-    trueDamageTaken: int | None = Field(None)
-    turretKills: int | None = Field(None)
-    turretTakedowns: int | None = Field(None)
-    turretsLost: int | None = Field(None)
-    unrealKills: int | None = Field(None)
-    visionScore: int | None = Field(None)
-    visionClearedPings: int | None = Field(None)
-    visionWardsBoughtInGame: int | None = Field(None)
-    wardsKilled: int | None = Field(None)
-    wardsPlaced: int | None = Field(None)
-    win: bool | None = Field(None)
+    totalTimeCCDealt: int | None = None
+    totalTimeSpentDead: int | None = None
+    totalUnitsHealed: int | None = None
+    tripleKills: int | None = None
+    trueDamageDealt: int | None = None
+    trueDamageDealtToChampions: int | None = None
+    trueDamageTaken: int | None = None
+    turretKills: int | None = None
+    turretTakedowns: int | None = None
+    turretsLost: int | None = None
+    unrealKills: int | None = None
+    visionScore: int | None = None
+    visionClearedPings: int | None = None
+    visionWardsBoughtInGame: int | None = None
+    wardsKilled: int | None = None
+    wardsPlaced: int | None = None
+    win: bool | None = None
 
     # noinspection PyNestedDecorators
     @field_validator('challenges', mode='before')
@@ -252,11 +252,11 @@ class ParticipantDto(BaseModel):
 
         return {key: repr(val) for key, val in obj.items()}
 
-    basicPings: int | None = Field(None)
-    dangerPings: int | None = Field(None)
-    retreatPings: int | None = Field(None)
-    baitPings: int | None = Field(None)
-    riotIdName: str | None = Field(None)
+    basicPings: int | None = None
+    dangerPings: int | None = None
+    retreatPings: int | None = None
+    baitPings: int | None = None
+    riotIdName: str | None = None
     model_config = ConfigDict(extra='forbid')
 
 
@@ -268,18 +268,18 @@ class InfoDto(BaseModel):
                                      description='Prior to patch 11.20, this field returns the game length in milliseconds calculated from gameEndTimestamp - gameStartTimestamp. Post patch 11.20, this field returns the max timePlayed of any participant in the game in seconds, which makes the behavior of this field consistent with that of match-v4. The best way to handling the change in this field is to treat the value as milliseconds if the gameEndTimestamp field isn\'t in the response and to treat the value as seconds if gameEndTimestamp is in the response.')
     gameEndTimestamp: int | None = Field(None,
                                          description='Unix timestamp for when match ends on the game server. This timestamp can occasionally be significantly longer than when the match "ends". The most reliable way of determining the timestamp for the end of the match would be to add the max time played of any participant to the gameStartTimestamp. This field was added to match-v5 in patch 11.20 on Oct 5th, 2021.')
-    gameId: int | None = Field(None)
+    gameId: int | None = None
     gameMode: GameMode | None = Field(None, description='Refer to the Game Constants documentation.')
-    gameName: str | None = Field(None)
+    gameName: str | None = None
     gameStartTimestamp: int | None = Field(None, description='Unix timestamp for when match starts on the game server.')
-    gameType: GameType | None = Field(None)
+    gameType: GameType | None = None
     gameVersion: str | None = Field(None,
                                     description='The first two parts can be used to determine the patch a game was played on.')
     mapId: int | None = Field(None, description='Refer to the Game Constants documentation.')
-    participants: List[ParticipantDto] | None = Field(None)
+    participants: List[ParticipantDto] | None = None
     platformId: Region | None = Field(None, description='Platform where the match was played.')
     queueId: int | None = Field(None, description='Refer to the Game Constants documentation.')
-    teams: List[TeamDto] | None = Field(None)
+    teams: List[TeamDto] | None = None
     tournamentCode: str | None = Field(None,
                                        description='Tournament code used to generate the match. This field was added to match-v5 in patch 11.13 on June 23rd, 2021.')
 
@@ -304,167 +304,167 @@ class MatchDto(BaseModel):
 # Timeline models
 
 class PositionDto(BaseModel):
-    x: int | None = Field(None)
-    y: int | None = Field(None)
+    x: int | None = None
+    y: int | None = None
 
     model_config = ConfigDict(extra='forbid')
 
 
 class DamageStatsDto(BaseModel):
-    magicDamageDone: int | None = Field(None)
-    magicDamageDoneToChampions: int | None = Field(None)
-    magicDamageTaken: int | None = Field(None)
-    physicalDamageDone: int | None = Field(None)
-    physicalDamageDoneToChampions: int | None = Field(None)
-    physicalDamageTaken: int | None = Field(None)
-    totalDamageDone: int | None = Field(None)
-    totalDamageDoneToChampions: int | None = Field(None)
-    totalDamageTaken: int | None = Field(None)
-    trueDamageDone: int | None = Field(None)
-    trueDamageDoneToChampions: int | None = Field(None)
-    trueDamageTaken: int | None = Field(None)
+    magicDamageDone: int | None = None
+    magicDamageDoneToChampions: int | None = None
+    magicDamageTaken: int | None = None
+    physicalDamageDone: int | None = None
+    physicalDamageDoneToChampions: int | None = None
+    physicalDamageTaken: int | None = None
+    totalDamageDone: int | None = None
+    totalDamageDoneToChampions: int | None = None
+    totalDamageTaken: int | None = None
+    trueDamageDone: int | None = None
+    trueDamageDoneToChampions: int | None = None
+    trueDamageTaken: int | None = None
 
     model_config = ConfigDict(extra='forbid')
 
 
 class ChampionStatsDto(BaseModel):
-    abilityHaste: int | None = Field(None)
-    abilityPower: int | None = Field(None)
-    armor: int | None = Field(None)
-    armorPen: int | None = Field(None)
-    armorPenPercent: int | None = Field(None)
-    attackDamage: int | None = Field(None)
-    attackSpeed: int | None = Field(None)
-    bonusArmorPenPercent: int | None = Field(None)
-    bonusMagicPenPercent: int | None = Field(None)
-    ccReduction: int | None = Field(None)
-    cooldownReduction: int | None = Field(None)
-    health: int | None = Field(None)
-    healthMax: int | None = Field(None)
-    healthRegen: int | None = Field(None)
-    lifesteal: int | None = Field(None)
-    magicPen: int | None = Field(None)
-    magicPenPercent: int | None = Field(None)
-    magicResist: int | None = Field(None)
-    movementSpeed: int | None = Field(None)
-    omnivamp: int | None = Field(None)
-    physicalVamp: int | None = Field(None)
-    power: int | None = Field(None)
-    powerMax: int | None = Field(None)
-    powerRegen: int | None = Field(None)
-    spellVamp: int | None = Field(None)
+    abilityHaste: int | None = None
+    abilityPower: int | None = None
+    armor: int | None = None
+    armorPen: int | None = None
+    armorPenPercent: int | None = None
+    attackDamage: int | None = None
+    attackSpeed: int | None = None
+    bonusArmorPenPercent: int | None = None
+    bonusMagicPenPercent: int | None = None
+    ccReduction: int | None = None
+    cooldownReduction: int | None = None
+    health: int | None = None
+    healthMax: int | None = None
+    healthRegen: int | None = None
+    lifesteal: int | None = None
+    magicPen: int | None = None
+    magicPenPercent: int | None = None
+    magicResist: int | None = None
+    movementSpeed: int | None = None
+    omnivamp: int | None = None
+    physicalVamp: int | None = None
+    power: int | None = None
+    powerMax: int | None = None
+    powerRegen: int | None = None
+    spellVamp: int | None = None
 
     model_config = ConfigDict(extra='forbid')
 
 
 class ParticipantFrameDto(BaseModel):
-    championStats: ChampionStatsDto | None = Field(None)
-    currentGold: int | None = Field(None)
-    damageStats: DamageStatsDto | None = Field(None)
-    goldPerSecond: int | None = Field(None)
-    jungleMinionsKilled: int | None = Field(None)
-    level: int | None = Field(None)
-    minionsKilled: int | None = Field(None)
-    participantId: int | None = Field(None)
-    position: PositionDto | None = Field(None)
-    timeEnemySpentControlled: int | None = Field(None)
-    totalGold: int | None = Field(None)
-    xp: int | None = Field(None)
+    championStats: ChampionStatsDto | None = None
+    currentGold: int | None = None
+    damageStats: DamageStatsDto | None = None
+    goldPerSecond: int | None = None
+    jungleMinionsKilled: int | None = None
+    level: int | None = None
+    minionsKilled: int | None = None
+    participantId: int | None = None
+    position: PositionDto | None = None
+    timeEnemySpentControlled: int | None = None
+    totalGold: int | None = None
+    xp: int | None = None
 
     model_config = ConfigDict(extra='forbid')
 
 
 class VictimDamageDealt(BaseModel):
-    basic: bool | None = Field(None)
-    magicDamage: int | None = Field(None)
-    name: str | None = Field(None)
-    participantId: int | None = Field(None)
-    physicalDamage: int | None = Field(None)
-    spellName: str | None = Field(None)
-    spellSlot: int | None = Field(None)
-    trueDamage: int | None = Field(None)
-    type: str | None = Field(None)
+    basic: bool | None = None
+    magicDamage: int | None = None
+    name: str | None = None
+    participantId: int | None = None
+    physicalDamage: int | None = None
+    spellName: str | None = None
+    spellSlot: int | None = None
+    trueDamage: int | None = None
+    type: str | None = None
 
     model_config = ConfigDict(extra='forbid')
 
 
 class VictimDamageReceived(BaseModel):
-    basic: bool | None = Field(None)
-    magicDamage: int | None = Field(None)
-    name: str | None = Field(None)
-    participantId: int | None = Field(None)
-    physicalDamage: int | None = Field(None)
-    spellName: str | None = Field(None)
-    spellSlot: int | None = Field(None)
-    trueDamage: int | None = Field(None)
-    type: str | None = Field(None)
+    basic: bool | None = None
+    magicDamage: int | None = None
+    name: str | None = None
+    participantId: int | None = None
+    physicalDamage: int | None = None
+    spellName: str | None = None
+    spellSlot: int | None = None
+    trueDamage: int | None = None
+    type: str | None = None
 
     model_config = ConfigDict(extra='forbid')
 
 
 class EventsTimeLineDto(BaseModel):
-    timestamp: int | None = Field(None)
-    type: str | None = Field(None)
+    timestamp: int | None = None
+    type: str | None = None
 
-    realTimestamp: int | None = Field(None)  # PAUSE_END, GAME_END
-    gameId: int | None = Field(None)  # GAME_END
-    winningTeam: int | None = Field(None)  # GAME_END
-    itemId: int | None = Field(None)  # ITEM_PURCHASED, ITEM_DESTROYED
-    participantId: int | None = Field(None)  # ITEM_PURCHASED, ITEM_DESTROYED
-    levelUpType: str | None = Field(None)  # SKILL_LEVEL_UP
-    skillSlot: int | None = Field(None)  # SKILL_LEVEL_UP
-    level: int | None = Field(None)  # LEVEL_UP
-    creatorId: int | None = Field(None)  # WARD_PLACED
-    wardType: str | None = Field(None)  # WARD_PLACED
-    killerId: int | None = Field(None)  # CHAMPION_KILL, BUILDING_KILL, CHAMPION_SPECIAL_KILL, ELITE_MONSTER_KILL
-    killStreakLength: int | None = Field(None)  # CHAMPION_KILL
-    position: PositionDto | None = Field(None)  # CHAMPION_KILL, TURRET_PLATE_DESTROYED, BUILDING_KILL
-    bounty: int | None = Field(None)  # CHAMPION_KILL, BUILDING_KILL, ELITE_MONSTER_KILL
-    shutdownBounty: int | None = Field(None)  # CHAMPION_KILL
-    victimDamageDealt: List[VictimDamageDealt] | None = Field(None)  # CHAMPION_KILL
-    victimDamageReceived: List[VictimDamageReceived] | None = Field(None)  # CHAMPION_KILL
-    victimId: int | None = Field(None)  # CHAMPION_KILL
-    assistingParticipantIds: List[int] | None = Field(None)  # CHAMPION_KILL, BUILDING_KILL, ELITE_MONSTER_KILL
-    teamId: int | None = Field(None)  # BUILDING_KILL, TURRET_PLATE_DESTROYED, ELITE_MONSTER_KILL
-    buildingType: str | None = Field(None)  # BUILDING_KILL
-    towerType: Tower | None = Field(None)  # BUILDING_KILL
-    laneType: str | None = Field(None)  # TURRET_PLATE_DESTROYED, BUILDING_KILL
-    killType: str | None = Field(None)  # CHAMPION_SPECIAL_KILL
-    multiKillLength: int | None = Field(None)  # CHAMPION_SPECIAL_KILL
-    monsterType: str | None = Field(None)  # ELITE_MONSTER_KILL
-    monsterSubType: str | None = Field(None)  # ELITE_MONSTER_KILL
-    killerTeamId: int | None = Field(None)  # ELITE_MONSTER_KILL
-    afterId: int | None = Field(None)  # ITEM_UNDO
-    beforeId: int | None = Field(None)  # ITEM_UNDO
-    goldGain: int | None = Field(None)  # ITEM_UNDO
-    actualStartTime: int | None = Field(None)  # OBJECTIVE_BOUNTY_PRESTART
-    name: str | None = Field(None)  # DRAGON_SOUL_GIVEN
-    transformType: str | None = Field(None)  # CHAMPION_TRANSFORM
+    realTimestamp: int | None = None  # PAUSE_END, GAME_END
+    gameId: int | None = None  # GAME_END
+    winningTeam: int | None = None  # GAME_END
+    itemId: int | None = None  # ITEM_PURCHASED, ITEM_DESTROYED
+    participantId: int | None = None  # ITEM_PURCHASED, ITEM_DESTROYED
+    levelUpType: str | None = None  # SKILL_LEVEL_UP
+    skillSlot: int | None = None  # SKILL_LEVEL_UP
+    level: int | None = None  # LEVEL_UP
+    creatorId: int | None = None  # WARD_PLACED
+    wardType: str | None = None  # WARD_PLACED
+    killerId: int | None = None  # CHAMPION_KILL, BUILDING_KILL, CHAMPION_SPECIAL_KILL, ELITE_MONSTER_KILL
+    killStreakLength: int | None = None  # CHAMPION_KILL
+    position: PositionDto | None = None  # CHAMPION_KILL, TURRET_PLATE_DESTROYED, BUILDING_KILL
+    bounty: int | None = None  # CHAMPION_KILL, BUILDING_KILL, ELITE_MONSTER_KILL
+    shutdownBounty: int | None = None  # CHAMPION_KILL
+    victimDamageDealt: List[VictimDamageDealt] | None = None  # CHAMPION_KILL
+    victimDamageReceived: List[VictimDamageReceived] | None = None  # CHAMPION_KILL
+    victimId: int | None = None  # CHAMPION_KILL
+    assistingParticipantIds: List[int] | None = None  # CHAMPION_KILL, BUILDING_KILL, ELITE_MONSTER_KILL
+    teamId: int | None = None  # BUILDING_KILL, TURRET_PLATE_DESTROYED, ELITE_MONSTER_KILL
+    buildingType: str | None = None  # BUILDING_KILL
+    towerType: Tower | None = None  # BUILDING_KILL
+    laneType: str | None = None  # TURRET_PLATE_DESTROYED, BUILDING_KILL
+    killType: str | None = None  # CHAMPION_SPECIAL_KILL
+    multiKillLength: int | None = None  # CHAMPION_SPECIAL_KILL
+    monsterType: str | None = None  # ELITE_MONSTER_KILL
+    monsterSubType: str | None = None  # ELITE_MONSTER_KILL
+    killerTeamId: int | None = None  # ELITE_MONSTER_KILL
+    afterId: int | None = None  # ITEM_UNDO
+    beforeId: int | None = None  # ITEM_UNDO
+    goldGain: int | None = None  # ITEM_UNDO
+    actualStartTime: int | None = None  # OBJECTIVE_BOUNTY_PRESTART
+    name: str | None = None  # DRAGON_SOUL_GIVEN
+    transformType: str | None = None  # CHAMPION_TRANSFORM
 
     model_config = ConfigDict(extra='forbid')
 
 
 class FramesTimeLineDto(BaseModel):
-    events: List[EventsTimeLineDto] | None = Field(None)
-    participantFrames: dict[str, ParticipantFrameDto] | None = Field(None)
-    timestamp: int | None = Field(None)
+    events: List[EventsTimeLineDto] | None = None
+    participantFrames: dict[str, ParticipantFrameDto] | None = None
+    timestamp: int | None = None
 
     model_config = ConfigDict(extra='forbid')
 
 
 class ParticipantTimeLineDto(BaseModel):
-    participantId: int | None = Field(None)
-    puuid: str | None = Field(None)
+    participantId: int | None = None
+    puuid: str | None = None
 
     model_config = ConfigDict(extra='forbid')
 
 
 class InfoTimeLineDto(BaseModel):
     endOfGameResult: str | None = Field(None, description='Refer to indicate if the game ended in termination.')
-    frameInterval: int | None = Field(None)
-    gameId: int | None = Field(None)
-    participants: List[ParticipantTimeLineDto] | None = Field(None)
-    frames: List[FramesTimeLineDto] | None = Field(None)
+    frameInterval: int | None = None
+    gameId: int | None = None
+    participants: List[ParticipantTimeLineDto] | None = None
+    frames: List[FramesTimeLineDto] | None = None
 
     model_config = ConfigDict(extra='forbid')
 
