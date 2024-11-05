@@ -3,12 +3,10 @@ import traceback
 
 from requests import ConnectionError
 from riotwatcher import LolWatcher, ApiError
-from sqlalchemy.dialects.postgresql import insert
-from sqlmodel import Session, select
 
 from config import get_logger, NOT_FOUNDED_EXIT, NOT_FOUNDED_ERROR, NOT_FOUNDED_WARNING
 from db import (
-    engine,
+    DB,
     Match,
     Participant,
     Challenge,
@@ -31,7 +29,9 @@ logger = get_logger(__name__)
 
 
 class Collector:
-    def __init__(self, *, api_key: str, region: Region):
+    def __init__(self, db: DB, *, api_key: str, region: Region):
+        self.db = db
+
         self.region = region
         self.api = LolWatcher(api_key, deserializer=PydanticDeserializer())
 
@@ -107,29 +107,6 @@ class Collector:
         return match, timeline
 
     @staticmethod
-    def _get_challenges(match: MatchDto, session: Session) -> dict[str, Challenge]:
-        challenges = set()
-        for participant in match.info.participants:
-            if participant.challenges is None:
-                continue
-
-            for challenge in participant.challenges:
-                challenges.add(challenge)
-
-        challenges_name_to_challenge = {}
-        for challenge in challenges:
-            statement = insert(Challenge).values(name=challenge)
-            # noinspection PyDeprecation
-            session.execute(statement.on_conflict_do_nothing(index_elements=['name']))
-
-            # noinspection PyTypeChecker,Pydantic
-            challenges_name_to_challenge[challenge] = session.exec(
-                select(Challenge).where(Challenge.name == challenge)
-            ).one()
-
-        return challenges_name_to_challenge
-
-    @staticmethod
     def _get_perks(participant: ParticipantDto) -> list[Perk]:
         perks_db = []
         for perk in participant.perks.styles:
@@ -142,9 +119,7 @@ class Collector:
 
         return perks_db
 
-    def _get_participants(
-            self, match: MatchDto, challenges_table: dict[str, Challenge], session: Session
-    ) -> list[Participant]:
+    def _get_participants(self, match: MatchDto, challenges_table: dict[str, Challenge]) -> list[Participant]:
         participants: list[Participant] = []
         for participant in match.info.participants:
 
@@ -155,16 +130,16 @@ class Collector:
 
             participant_db.perks = self._get_perks(participant)
 
-            if participant.missions is not None:
+            if participant.missions:
                 participant_db.missions = Missions.model_validate(participant.missions.model_dump())
 
-            if participant.challenges is not None:
+            if participant.challenges:
                 for challenge_name, challenge_value in participant.challenges.items():
-                    session.add(ChallengeParticipantLink(
+                    ChallengeParticipantLink(
                         value=challenge_value,
                         challenge=challenges_table[challenge_name],
                         participant=participant_db
-                    ))
+                    )
 
             participants.append(participant_db)
 
@@ -310,37 +285,23 @@ class Collector:
 
         return frames_db
 
-    # noinspection PyPep8Naming
-    def is_match_in_db(self) -> bool:
-        with Session(engine) as session:
-            # noinspection PyTypeChecker,Pydantic
-            if session.exec(select(Match).where(Match.matchId == self.matchId)).one_or_none() is not None:
-                logger.warning(f'match with id = {self.index} and matchId = {self.matchId} already in db')
-                return True
-
-        return False
-
-    def insert(self, match: MatchDto, timeline: TimelineDto):
+    def get_match(self, match: MatchDto, timeline: TimelineDto) -> Match | None:
         if match is None or timeline is None:
             return
 
-        with Session(engine) as session:
-            match_db = Match.model_validate(match.info.model_dump() | match.metadata.model_dump())
+        match_db = Match.model_validate(match.info.model_dump() | match.metadata.model_dump())
 
-            challenges = self._get_challenges(match, session)
-            participants = self._get_participants(match, challenges, session)
-            teams = self._get_teams(match, participants)
-            frames = self._get_frames(timeline, match_db, participants, teams)
+        challenges = self.db.add_challenges(match)
+        participants = self._get_participants(match, challenges)
+        teams = self._get_teams(match, participants)
+        frames = self._get_frames(timeline, match_db, participants, teams)
 
-            match_db.frameInterval = timeline.info.frameInterval
-            match_db.participants = participants
-            match_db.teams = teams
-            match_db.frames = frames
+        match_db.frameInterval = timeline.info.frameInterval
+        match_db.participants = participants
+        match_db.teams = teams
+        match_db.frames = frames
 
-            session.add(match_db)
-            session.commit()
-
-        logger.info(f'match and timeline with id = {self.index} are inserted')
+        return match_db
 
     def start(self, start_id: int):
         self.index = start_id
@@ -348,9 +309,15 @@ class Collector:
 
         while True:
             try:
-                if not self.is_match_in_db():
-                    match, timeline = self.get_match_and_timeline()
-                    self.insert(match, timeline)
+                if not self.db.is_match_in_db(self.matchId):
+                    match = self.get_match(*self.get_match_and_timeline())
+
+                    if match:
+                        self.db.add_match(match)
+                        logger.info(f'match and timeline with id = {self.index} are inserted')
+
+                else:
+                    logger.warning(f'match with matchId = {self.matchId} already in db')
 
             except Exception as err:
                 logger.error(f'unexpected error {err}: {traceback.format_exc()}')

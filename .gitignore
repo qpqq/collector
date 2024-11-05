@@ -33,8 +33,9 @@ client_old
 
 # Custom files
 stats.html
-test.*
+other/test.py
 *.local
-secret.toml
-secrets.json
+secret*
 git.sh
+postgres_password
+secrets.json

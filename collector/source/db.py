@@ -2,10 +2,14 @@ from datetime import datetime, UTC
 from typing import List, Union
 
 from pydantic import field_validator
-from sqlmodel import SQLModel, Field, Column, Enum, create_engine, Relationship
+from sqlalchemy.dialects.postgresql import insert
+from sqlmodel import SQLModel, Field, Column, Enum, Relationship, create_engine, Session, select
 
-from config import POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_DB
+from config import get_logger
 from enums import Region, GameMode, GameType, Lane, LaneDB, Role, Tower
+from models import MatchDto
+
+logger = get_logger(__name__)
 
 
 def utcnow() -> datetime:
@@ -487,16 +491,54 @@ class ParticipantFrame(SQLModel, table=True):
     participant: Participant = Relationship(back_populates='participant_frames')
 
 
-engine = create_engine(
-    f'postgresql+psycopg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DB}',
-    pool_recycle=3600
-)
+class DB:
+    def __init__(self, postgres_user, postgres_password, postgres_host, postgres_database):
+        self.engine = create_engine(
+            f'postgresql+psycopg://{postgres_user}:{postgres_password}@{postgres_host}/{postgres_database}',
+            pool_recycle=3600
+        )
 
+    def create_tables(self):
+        SQLModel.metadata.create_all(self.engine)
 
-def drop_create_all():
-    SQLModel.metadata.drop_all(engine)
-    SQLModel.metadata.create_all(engine)
+    def drop_tables(self):
+        SQLModel.metadata.drop_all(self.engine)
 
+    # noinspection PyPep8Naming
+    def is_match_in_db(self, matchId: str) -> bool:
+        with Session(self.engine) as session:
+            # noinspection PyTypeChecker,Pydantic
+            if session.exec(select(Match).where(Match.matchId == matchId)).one_or_none() is not None:
+                return True
 
-if __name__ == "__main__":
-    drop_create_all()
+        return False
+
+    def add_challenges(self, match: MatchDto) -> dict[str, Challenge]:
+        challenges = set()
+        for participant in match.info.participants:
+            if participant.challenges is None:
+                continue
+
+            for challenge in participant.challenges:
+                challenges.add(challenge)
+
+        challenges_name_to_challenge = {}
+        with Session(self.engine) as session:
+            for challenge in challenges:
+                statement = insert(Challenge).values(name=challenge)
+                # noinspection PyDeprecation
+                session.execute(statement.on_conflict_do_nothing(index_elements=['name']))
+
+                # noinspection PyTypeChecker,Pydantic
+                challenges_name_to_challenge[challenge] = session.exec(
+                    select(Challenge).where(Challenge.name == challenge)
+                ).one()
+
+            session.commit()
+
+        return challenges_name_to_challenge
+
+    def add_match(self, match: Match):
+        with Session(self.engine) as session:
+            session.add(match)
+            session.commit()

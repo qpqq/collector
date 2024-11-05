@@ -1,0 +1,47 @@
+name: 'collector'
+
+services:
+  collector:
+    build:
+      context: ./collector
+      dockerfile: Dockerfile
+    restart: no
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    entrypoint: [ 'python', './source/main.py' ]
+    secrets:
+      - secrets.json
+      - postgres_password
+
+  postgres:
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    healthcheck:
+      test: [ 'CMD-SHELL', 'pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}' ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    env_file:
+      - .env
+    volumes:
+      - data:/var/lib/postgresql/data
+    secrets:
+      - postgres_password
+
+volumes:
+  data:
+
+secrets:
+  secrets.json:
+    file: secrets.json
+  postgres_password:
+    file: postgres_password
