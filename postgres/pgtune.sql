@@ -2,9 +2,9 @@
 -- OS Type: linux
 -- DB Type: dw
 -- Total Memory (RAM): 2 GB
--- CPUs num: 1
+-- CPUs num: 2
 -- Data Storage: ssd
--- https://pgtune.leopard.in.ua/?dbVersion=17&osType=linux&dbType=dw&cpuNum=1&totalMemory=2&totalMemoryUnit=GB&connectionNum=&hdType=ssd
+-- https://pgtune.leopard.in.ua/?dbVersion=17&osType=linux&dbType=dw&cpuNum=2&totalMemory=2&totalMemoryUnit=GB&connectionNum=&hdType=ssd
 
 ALTER SYSTEM SET
  max_connections = '40';
