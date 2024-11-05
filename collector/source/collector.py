@@ -4,7 +4,7 @@ import traceback
 from requests import ConnectionError
 from riotwatcher import LolWatcher, ApiError
 
-from config import get_logger, NOT_FOUNDED_EXIT, NOT_FOUNDED_ERROR, NOT_FOUNDED_WARNING
+from config import get_logger, NOT_FOUNDED_EXIT, NOT_FOUNDED_ERROR, NOT_FOUNDED_WARNING, ERROR_COUNT_EXCEEDED
 from db import (
     DB,
     Match,
@@ -37,6 +37,7 @@ class Collector:
 
         self.index = -1
         self.last_founded = self.index
+        self.error_counter = 0
 
     # noinspection PyPep8Naming
     @property
@@ -308,6 +309,10 @@ class Collector:
         self.last_founded = self.index - 1
 
         while True:
+            if self.error_counter > ERROR_COUNT_EXCEEDED:
+                logger.critical(f'error counter exceeded: {self.error_counter}')
+                sys.exit(1)
+
             try:
                 if not self.db.is_match_in_db(self.matchId):
                     match = self.get_match(*self.get_match_and_timeline())
@@ -319,8 +324,11 @@ class Collector:
                 else:
                     logger.warning(f'match with matchId = {self.matchId} already in db')
 
+                self.error_counter = 0
+
             except Exception as err:
                 logger.error(f'unexpected error {err}: {traceback.format_exc()}')
+                self.error_counter += 1
 
             # break
             self.index += 1
