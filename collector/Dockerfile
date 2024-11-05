@@ -25,7 +25,7 @@ RUN pip wheel --no-cache-dir --wheel-dir /usr/src/app/wheels -r requirements.txt
 # lint
 RUN pip install flake8~=7.1.0
 COPY ./source /usr/src/app/
-RUN #flake8 --ignore=E501,W504 .  # TODO
+RUN flake8 --ignore=E501,W504 .
 
 
 # FINAL
